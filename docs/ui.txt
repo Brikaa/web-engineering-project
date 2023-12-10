@@ -1,0 +1,25 @@
+- Guest homepage
+  - Login
+    - Email
+    - Password
+  - Register
+    - Email
+    - Name
+    - Password
+    - Telephone
+    - Type
+    - If company
+      - Bio
+      - Address
+      - Location (optional) (how does that even differ from address?)
+      - Username
+      - Logo image
+    - If passenger
+      - Photo
+      - Passport image
+- User homepage
+  - If company
+    - Company homepage
+  - If passenger
+    - User homepage
+-
