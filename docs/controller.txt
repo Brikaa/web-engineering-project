@@ -32,4 +32,3 @@
   - function api_fun1()
     - with_db(function(db) { with_auth(db, controllerFunction) })
 - The user lands on a central component that loads the appropriate view according to the action param
-- Almost no JavaScript

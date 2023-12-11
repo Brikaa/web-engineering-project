@@ -1,0 +1,32 @@
+- User
+  - id
+  - name
+  - email
+  - password
+  - telephone
+  - photo_url
+  - money
+- Passenger
+  - id
+  - userId
+  - passport_image
+- Company
+  - id
+  - user_id
+  - bio
+  - address
+- Flight
+  - id
+  - name
+  - max_passengers
+  - price
+- FlightReservation
+  - id
+  - passenger_id
+  - flight_id
+- FlightCity
+  - id
+  - name
+  - flight_id
+  - start_date
+  - end_date
