@@ -1,0 +1,35 @@
+# REST architecture
+- All query parameters
+- Map routes to functions, there can exist multiple routes of the same name but with different methods
+  - router = {
+    "route": {
+      "method": function
+    }
+  }
+  - For every request, get method and check router["route"]["method"]
+- Some functions have access to database
+  - Database controller
+- Some functions need the user to be authorized as a certain role, some functions need access to the user context
+  - Database controller wrapper function
+- Functions need to check valid request body
+  - Try, catch -> return 500; console error
+- Frontend
+  - All JavaScript?
+    - Head, body in HTML
+    - Create body function
+      - Clears current body
+      - Determines navbar
+      - Does template
+    - Component functions call create body function with appropriate html
+
+# MVC architecture (chosen)
+- API functions
+- Some functions have access to database
+  - Database controller
+- Some functions need the user to be authorized as a certain role, some functions need access to the user context
+  - Database controller wrapper function
+- Views are functions that accept api functions
+  - function api_fun1()
+    - with_db(function(db) { with_auth(db, controllerFunction) })
+- The user lands on a central component that loads the appropriate view according to the action param
+- Almost no JavaScript

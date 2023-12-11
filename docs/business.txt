@@ -6,4 +6,3 @@
   - Can search all flights on the website based on source and destination and book a flight using money he added
     to his account or cash
   - Can send messages to companies and view their replies
-
