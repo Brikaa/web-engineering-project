@@ -4,7 +4,7 @@ USE app;
 
 CREATE TABLE User (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
-  `name` varchar(1024) UNIQUE NOT NULL,
+  `name` varchar(512) UNIQUE NOT NULL,
   `email` varchar(256) UNIQUE NOT NULL,
   `password` varchar(256) NOT NULL,
   `telephone` varchar(128) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE Passenger (
 CREATE TABLE Company (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
   `user_id` varchar(36) UNIQUE NOT NULL,
-  `bio` varchar(65536) NOT NULL,
+  `bio` TEXT NOT NULL,
   `address` varchar(1024) NOT NULL,
   CONSTRAINT FK_COMPANY_USER FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
 );
@@ -39,7 +39,7 @@ CREATE TABLE Flight (
 CREATE TABLE FlightReservation (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
   `passenger_id` varchar(36) NOT NULL,
-  `flight_id` varchar(36) NOT NULL,
+  `flight_id` varchar(36) NOT NULL
 );
 
 CREATE TABLE FlightCity (

@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require 'model.php';
+require_once 'model.php';
 
 function with_prepared_statement($con, string $sql, $fn) {
   $stmt = $con->prepare($sql);
@@ -29,7 +29,7 @@ function select_one($con, string $sql, string $binding, array $params) {
   });
 }
 
-function insert_user(
+$insert_user = function(
   $con, InsertUserRequest $user
 ) {
   return execute_statement(
@@ -38,9 +38,9 @@ function insert_user(
     "sssssd",
     [$user->email, $user->name, $user->password, $user->telephone, $user->photo_url, $user->money]
   );
-}
+};
 
-function update_user_by_id(
+$update_user_by_id = function(
   $con,
   string $id,
   InsertUserRequest $user,
@@ -52,7 +52,7 @@ function update_user_by_id(
     "sssssds",
     [$user->email, $user->name, $user->password, $user->telephone, $user->photo_url, $user->money, $user_id]
   );
-}
+};
 
 function select_user_by_condition($con, string $condition, string $binding, array $params): UserContext {
   $user = select_one(
@@ -77,16 +77,16 @@ function select_user_by_condition($con, string $condition, string $binding, arra
   return null;
 }
 
-function select_user_by_id($con, string $id): UserContext {
+$select_user_by_id = function($con, string $id): UserContext {
   return select_user_by_condition($con, "User.id=?", "s", [$id]);
-}
+};
 
-function select_user_by_name_or_email($con, string $name, string $email): UserContext {
+$select_user_by_name_or_email = function($con, string $name, string $email): UserContext {
   return select_user_by_condition($con, "User.name=? OR User.email=?", "ss", [$id, $email]);
-}
+};
 
-function select_user_by_email_and_password($con, string $email, string $password): UserContext {
+$select_user_by_email_and_password = function($con, string $email, string $password): UserContext {
   return select_user_by_condition($con, "User.email = ? AND User.password = ?", "ss", [$email, $password]);
-}
+};
 
 ?>

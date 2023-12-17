@@ -4,15 +4,19 @@ volumes:
 
 services:
   wep-php:
+    container_name: wep-php
     build: ./php
     ports:
       - '9000:9000'
     depends_on:
       - wep-db
   wep-db:
+    container_name: wep-db
     build: ./db
     environment:
       - MYSQL_ROOT_PASSWORD=root123
       - MYSQL_DATABASE=app
       - MYSQL_USER=user
       - MYSQL_PASSWORD=user123
+    volumes:
+      - wep-db:/var/lib/mysql
