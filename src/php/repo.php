@@ -1,23 +1,27 @@
 <?php
+
 declare(strict_types=1);
 require_once 'model.php';
 
-function with_prepared_statement($con, string $sql, $fn) {
+function with_prepared_statement(mysqli $con, string $sql, $fn)
+{
   $stmt = $con->prepare($sql);
-  $res = $fn(stmt);
-  $s->close();
+  $res = $fn($stmt);
+  $stmt->close();
   return $res;
 }
 
-function execute_statement($con, string $sql, string $binding, array $params) {
-  return with_prepared_statement($con, $sql, function($s) {
+function execute_statement(mysqli $con, string $sql, string $binding, array $params)
+{
+  return with_prepared_statement($con, $sql, function ($s) use (&$binding, &$params) {
     $s->bind_param($binding, ...$params);
     return $s->execute();
   });
 }
 
-function select_one($con, string $sql, string $binding, array $params) {
-  return with_prepared_statement($con, $sql, function($s) {
+function select_one(mysqli $con, string $sql, string $binding, array $params)
+{
+  return with_prepared_statement($con, $sql, function ($s) use (&$binding, &$params) {
     $s->bind_param($binding, ...$params);
     if ($s->execute()) {
       $res = $s->get_result();
@@ -29,8 +33,9 @@ function select_one($con, string $sql, string $binding, array $params) {
   });
 }
 
-$insert_user = function(
-  $con, InsertUserRequest $user
+$insert_user = function (
+  mysqli $con,
+  InsertUserRequest $user
 ) {
   return execute_statement(
     $con,
@@ -40,21 +45,21 @@ $insert_user = function(
   );
 };
 
-$update_user_by_id = function(
-  $con,
+$update_user_by_id = function (
+  mysqli $con,
   string $id,
-  InsertUserRequest $user,
-  float $money
+  InsertUserRequest $user
 ) {
   return execute_statement(
     $con,
     "UPDATE User SET `email`=?, `name`=?, `password`=?, `telephone`=?, `photo_url`=?, `money`=? WHERE id=?",
     "sssssds",
-    [$user->email, $user->name, $user->password, $user->telephone, $user->photo_url, $user->money, $user_id]
+    [$user->email, $user->name, $user->password, $user->telephone, $user->photo_url, $user->money, $id]
   );
 };
 
-function select_user_by_condition($con, string $condition, string $binding, array $params): UserContext {
+function select_user_by_condition(mysqli $con, string $condition, string $binding, array $params): UserContext
+{
   $user = select_one(
     $con,
     "SELECT User.id, User.name, Passenger.id, Company.id FROM User WHERE $condition
@@ -64,8 +69,8 @@ function select_user_by_condition($con, string $condition, string $binding, arra
     $params
   );
   if ($user) {
-    $role;
-    if ($user[2] == null && user[3] == null) {
+    $role = NONE_ROLE;
+    if ($user[2] == null && $user[3] == null) {
       $role = NONE_ROLE;
     } else if ($user[2] != null) {
       $role = PASSENGER_ROLE;
@@ -77,16 +82,14 @@ function select_user_by_condition($con, string $condition, string $binding, arra
   return null;
 }
 
-$select_user_by_id = function($con, string $id): UserContext {
+$select_user_by_id = function (mysqli $con, string $id): UserContext {
   return select_user_by_condition($con, "User.id=?", "s", [$id]);
 };
 
-$select_user_by_name_or_email = function($con, string $name, string $email): UserContext {
-  return select_user_by_condition($con, "User.name=? OR User.email=?", "ss", [$id, $email]);
+$select_user_by_name_or_email = function (mysqli $con, string $name, string $email): UserContext {
+  return select_user_by_condition($con, "User.name=? OR User.email=?", "ss", [$name, $email]);
 };
 
-$select_user_by_email_and_password = function($con, string $email, string $password): UserContext {
+$select_user_by_email_and_password = function (mysqli $con, string $email, string $password): UserContext {
   return select_user_by_condition($con, "User.email = ? AND User.password = ?", "ss", [$email, $password]);
 };
-
-?>
