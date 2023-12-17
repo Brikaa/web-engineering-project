@@ -28,7 +28,9 @@
   - Database controller
 - Some functions need the user to be authorized as a certain role, some functions need access to the user context
   - Database controller wrapper function
-- Views are functions that accept api functions
-  - function api_fun1()
-    - with_db(function(db) { with_auth(db, controllerFunction) })
+- Views are functions that accept controller functions, db and context
+  - with_db(function (db) { with_auth(db, 'role', function(db, ctx) { view_fn(ctx, db, controller_fn1, cfn2) }) })
+  - with_db(function(db) { view_fn(db, controller_fn1) })
+  - function () { view_fn(controller_fn1) }
+  - routes are represented as a map of action name to function that doesn't take parameters
 - The user lands on a central component that loads the appropriate view according to the action param

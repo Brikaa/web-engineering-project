@@ -54,7 +54,7 @@ function update_user_by_id(
   );
 }
 
-function select_user_by_condition($con, string $condition, string $binding, array $params) {
+function select_user_by_condition($con, string $condition, string $binding, array $params): UserContext {
   $user = select_one(
     $con,
     "SELECT User.id, User.name, Passenger.id, Company.id FROM User WHERE $condition
@@ -77,11 +77,15 @@ function select_user_by_condition($con, string $condition, string $binding, arra
   return null;
 }
 
-function select_user_by_id($con, string $id) {
+function select_user_by_id($con, string $id): UserContext {
   return select_user_by_condition($con, "User.id=?", "s", [$id]);
 }
 
-function select_user_by_email_and_password($con, string $email, string $password) {
+function select_user_by_name_or_email($con, string $name, string $email): UserContext {
+  return select_user_by_condition($con, "User.name=? OR User.email=?", "ss", [$id, $email]);
+}
+
+function select_user_by_email_and_password($con, string $email, string $password): UserContext {
   return select_user_by_condition($con, "User.email = ? AND User.password = ?", "ss", [$email, $password]);
 }
 
