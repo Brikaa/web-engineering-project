@@ -1,0 +1,45 @@
+body {
+  margin: 0;
+  --white: white;
+  --primary-button-color: #b18f69;
+  --secondary-button-color: #604424;
+}
+
+.home {
+  background: url('/assets/images/airport-image.jpg');
+  display: grid;
+  place-items: center;
+  color: var(--white);
+  height: 100vh;
+  background-size: cover;
+}
+
+.home > .hero > h1 {
+  font-size: 3rem;
+}
+
+.home > .hero > .buttons {
+  display: flex;
+  gap: 3rem;
+  justify-content: center;
+}
+
+.button {
+  transition: all 0.1s;
+  text-decoration: none;
+  border-radius: 5px;
+  padding: 0.8rem 1.2rem;
+  color: var(--white);
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+.button.primary {
+  background-color: var(--primary-button-color);
+}
+
+.button.secondary {
+  background-color: var(--secondary-button-color);
+}
