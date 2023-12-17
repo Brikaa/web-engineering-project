@@ -1,8 +1,8 @@
 body {
   margin: 0;
   --white: white;
-  --primary-button-color: #b18f69;
-  --secondary-button-color: #604424;
+  --primary-button-color: rgba(177, 143, 105, .85);;
+  --secondary-button-color: rgba(96, 68, 36, 0.85);;
 }
 
 .home {
