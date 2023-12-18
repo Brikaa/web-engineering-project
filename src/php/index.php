@@ -4,22 +4,9 @@ declare(strict_types=1);
 require_once 'views/home.php';
 require_once 'views/error.php';
 require_once 'views/not_found.php';
+require_once 'views/login.php';
 
 const ACTION = "action";
-
-$with_db = function ($fn) {
-  return function () use (&$fn) {
-    $con = mysqli_connect("wep-db", "user", "user123", "app");
-    $fn($con);
-  };
-};
-
-$with_auth = function ($con, string $role, $fn) {
-  return function () use (&$con, &$fn, &$role) {
-    $ctx = "something"; // TODO: generate context from permission
-    $fn($con, $ctx);
-  };
-};
 
 $handle_action = function ($action, $router, $error_view, $not_found_view) {
   try {
@@ -33,8 +20,11 @@ $handle_action = function ($action, $router, $error_view, $not_found_view) {
   }
 };
 
-if (!array_key_exists(ACTION, $_GET)) {
-  $_GET[ACTION] = "";
+$action = "";
+if (array_key_exists(ACTION, $_GET)) {
+  $action = $_GET[ACTION];
+} else if (array_key_exists(ACTION, $_POST)) {
+  $action = $_POST[ACTION];
 }
-$router = array("" => $home_view);
-$handle_action($_GET[ACTION], $router, $error_view, $not_found_view);
+$router = array("" => $home_view, "login" => $login_view);
+$handle_action($action, $router, $error_view, $not_found_view);

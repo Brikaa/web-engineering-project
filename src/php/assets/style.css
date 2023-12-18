@@ -1,8 +1,9 @@
 body {
   margin: 0;
   --white: white;
-  --primary-button-color: rgba(177, 143, 105, .85);;
-  --secondary-button-color: rgba(96, 68, 36, 0.85);;
+  --black: black;
+  --primary-button-color: rgba(177, 143, 105, 0.85);
+  --secondary-button-color: rgba(96, 68, 36, 0.85);
 }
 
 .home {
@@ -14,14 +15,30 @@ body {
   background-size: cover;
 }
 
-.home > .hero > h1 {
+.home > .landing-content > h1 {
   font-size: 3rem;
 }
 
-.home > .hero > .buttons {
+.home > .landing-content > .buttons {
   display: flex;
   gap: 3rem;
   justify-content: center;
+}
+
+.landing-content > form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.landing-content > form > .input {
+  background-color: rgba(255, 255, 255, 0.3);
+  outline: none;
+  color: var(--black);
+  border: 2px solid white;
+  padding: 0.5rem;
+  border-radius: 3px;
+  backdrop-filter: blur(3px);
 }
 
 .button {
@@ -30,9 +47,11 @@ body {
   border-radius: 5px;
   padding: 0.8rem 1.2rem;
   color: var(--white);
+  border: none;
+  outline: none;
 }
 
-.button:hover {
+.button:hover, .button:active, .button:focus {
   opacity: 0.9;
 }
 
