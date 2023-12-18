@@ -71,3 +71,57 @@ final class Passenger
     $this->passport_image_url = $passport_image_url;
   }
 }
+
+final class City
+{
+  public string $name;
+  public DateTime $date_in_city;
+}
+
+class BareCity {
+  public string $id;
+  public string $name;
+  public string $company_name;
+  public float $price;
+}
+
+final class FlightSummary extends BareCity
+{
+  public City $source;
+  public City $destination;
+
+  public function __construct(
+    string $id,
+    string $name,
+    string $company_name,
+    float $price,
+    City $source,
+    City $destination
+  ) {
+    $this->id = $id;
+    $this->name = $name;
+    $this->company_name = $company_name;
+    $this->price = $price;
+    $this->source = $source;
+    $this->destination = $destination;
+  }
+}
+
+final class FlightDetail extends BareCity
+{
+  public array $cities;
+
+  public function __construct(
+    string $id,
+    string $name,
+    string $company_name,
+    float $price,
+    array $cities
+  ) {
+    $this->id = $id;
+    $this->name = $name;
+    $this->company_name = $company_name;
+    $this->price = $price;
+    $this->cities = $cities;
+  }
+}

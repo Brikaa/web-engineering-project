@@ -39,4 +39,19 @@
   - On signup, create user, empty optional credentials
   - On type choice, insert passenger/company
   - On view, show user data and type data according to role
-  -
+
+- Get upcoming flights summary
+  - Flights for passenger join companies where start_city_date in future
+    - Id
+    - Name
+    - Start city
+    - End city
+    - Company name
+    - Price
+- Get completed flights
+  - Same as upcoming flights but start_city_date in past
+- Get available flights
+  - Same as upcoming flights but with extra condition that there doesn't exist a flight reservation from this passenger
+    to this flight
+- Get flight details
+  - Flight for passenger join companies join cities, consolidate cities

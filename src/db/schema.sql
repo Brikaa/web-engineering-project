@@ -29,24 +29,29 @@ CREATE TABLE Company (
 
 CREATE TABLE Flight (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
-  `company_id` varchar(36) NOT NULL,
+  `company_user_id` varchar(36) NOT NULL,
   `name` varchar(1024) NOT NULL,
   `max_passengers` INT NOT NULL,
   `price` DOUBLE NOT NULL,
-  CONSTRAINT FK_FLIGHT_COMPANY FOREIGN KEY (company_id) REFERENCES Company(id) ON DELETE CASCADE
+  CONSTRAINT FK_FLIGHT_COMPANY FOREIGN KEY (company_user_id) REFERENCES User(id) ON DELETE CASCADE
 );
 
 CREATE TABLE FlightReservation (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
-  `passenger_id` varchar(36) NOT NULL,
-  `flight_id` varchar(36) NOT NULL
+  `passenger_user_id` varchar(36) NOT NULL,
+  `flight_id` varchar(36) NOT NULL,
+  UNIQUE KEY UQ_FLIGHT_PASSENGER (passenger_user_id, flight_id),
+  CONSTRAINT FK_FLIGHT_RESERVATION_PASSENGER
+    FOREIGN KEY (passenger_user_id) REFERENCES User(id)
+    ON DELETE CASCADE,
+  CONSTRAINT FK_FLIGHT_RESERVATION_FLIGHT FOREIGN KEY (flight_id) REFERENCES Flight(id) ON DELETE CASCADE
 );
 
 CREATE TABLE FlightCity (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
   `flight_id` varchar(36) NOT NULL,
   `name` varchar(256) NOT NULL,
-  `start` TIMESTAMP NOT NULL,
-  `end` TIMESTAMP NOT NULL,
+  `date_in_city` TIMESTAMP NOT NULL,
+  UNIQUE KEY UQ_FLIGHT_CITY (`flight_id`, `name`),
   CONSTRAINT FK_FLIGHT_CITY FOREIGN KEY (flight_id) REFERENCES Flight(id) ON DELETE CASCADE
 );
