@@ -1,11 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 const PASSENGER_ROLE = 'passenger';
 const COMPANY_ROLE = 'company';
 const NONE_ROLE = 'none';
 
-final class InsertUserRequest {
+final class InsertUserRequest
+{
   public string $email;
   public string $name;
   public string $password;
@@ -30,16 +32,42 @@ final class InsertUserRequest {
   }
 }
 
-final class UserContext {
+final class UserContext
+{
   public string $id;
   public string $name;
   public string $role;
 
-  public function __construct(string $id, string $name, string $role) {
+  public function __construct(string $id, string $name, string $role)
+  {
     $this->id = $id;
     $this->name = $name;
     $this->role = $role;
   }
 }
 
-?>
+final class Company
+{
+  public string $user_id;
+  public string $bio;
+  public string $address;
+
+  public function __construct(string $user_id, string $bio, string $address)
+  {
+    $this->user_id = $user_id;
+    $this->bio = $bio;
+    $this->address = $address;
+  }
+}
+
+final class Passenger
+{
+  public string $user_id;
+  public string $passport_image_url;
+
+  public function __construct(string $user_id, string $passport_image_url)
+  {
+    $this->user_id = $user_id;
+    $this->passport_image_url = $passport_image_url;
+  }
+}
