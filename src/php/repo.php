@@ -77,12 +77,13 @@ function select_user_by_condition(mysqli $con, string $condition, string $bindin
   return null;
 }
 
-function select__flights_summaries_for_user_by_date_condition(
+function select_flights_summaries_by_condition(
   mysqli $con,
-  string $date_condition,
-  string $user_id
-): array
-{
+  string $from,
+  string $condition,
+  string $bindings,
+  array $params,
+): array {
   $arr = select_all(
     $con,
     "SELECT
@@ -94,8 +95,7 @@ function select__flights_summaries_for_user_by_date_condition(
       StartCity.date_in_city,
       EndCity.name,
       EndCity.date_in_city
-    FROM FlightReservation
-      LEFT JOIN Flight ON FlightReservation.flight_id = Flight.id
+    FROM $from
       LEFT JOIN
         (SELECT C.name, C.date_in_city FROM FlightCity AS C ORDER BY C.date_in_city ASC LIMIT 1)
       AS StartCity ON StartCity.flight_id = Flight.id
@@ -103,11 +103,9 @@ function select__flights_summaries_for_user_by_date_condition(
         (SELECT C.name, C.date_in_city FROM FlightCity AS C ORDER BY C.date_in_city DESC LIMIT 1)
       AS EndCity ON EndCity.flight_id = Flight.id
       LEFT JOIN Company ON Company.user_id = Flight.company_user_id
-    WHERE
-      FlightReservation.passenger_user_id = ?
-      AND $date_condition",
-    "s",
-    [$user_id]
+    WHERE $condition",
+    $bindings,
+    $params
   );
   $res = array();
   foreach ($arr as $row) {
@@ -250,12 +248,55 @@ class Repo
   public function select_upcoming_flights_summaries_for_user(mysqli $con, string $user_id): array
   {
     $now = date("Y-m-d H:i:s");
-    return select__flights_summaries_for_user_by_date_condition($con, "StartCity.date_in_city > $now", $user_id);
+    return select_flights_summaries_by_condition(
+      $con,
+      "FlightReservation LEFT JOIN Flight ON FlightReservation.flight_id = Flight.id",
+      "FlightReservation.passenger_user_id = ? AND StartCity.date_in_city > $now",
+      "s",
+      [$user_id]
+    );
   }
 
   public function select_completed_flights_summaries_for_user(mysqli $con, string $user_id): array
   {
     $now = date("Y-m-d H:i:s");
-    return select__flights_summaries_for_user_by_date_condition($con, "EndCity.date_in_city < $now", $user_id);
+    return select_flights_summaries_by_condition(
+      $con,
+      "FlightReservation LEFT JOIN Flight ON FlightReservation.flight_id = Flight.id",
+      "FlightReservation.passenger_user_id = ? AND EndCity.date_in_city < $now",
+      "s",
+      [$user_id]
+    );
+  }
+
+  public function select_available_flights_summaries_for_user(mysqli $con, string $user_id): array
+  {
+    $now = date("Y-m-d H:i:s");
+    return select_flights_summaries_by_condition(
+      $con,
+      "Flight",
+      "StartCity.date_in_city > $now
+      AND Flight.id NOT IN (
+        SELECT FlightReservation.flight_id FROM FlightReservation WHERE FlightReservation.passenger_user_id = ?
+      )",
+      "s",
+      [$user_id]
+    );
+  }
+
+  public function flight_reservation_by_user_id_and_flight_id_exists(
+    mysqli $con,
+    string $user_id,
+    string $flight_id
+  ): bool {
+    return select_one(
+      $con,
+      "SELECT FlightReservation.flight_id FROM FlightReservation
+      WHERE
+        FlightReservation.passenger_user_id = ?
+        AND FlightReservation.flight_id = ?",
+      "ss",
+      [$user_id, $flight_id]
+    ) != null;
   }
 }
