@@ -48,10 +48,11 @@
     - End city
     - Company name
     - Price
-- Get completed flights
+- Get completed flights summary
   - Same as upcoming flights but start_city_date in past
-- Get available flights
+- Get available flights summary
   - Same as upcoming flights but with extra condition that there doesn't exist a flight reservation from this passenger
+    to this flight and the max number of passengers is more than the number of flight reservations from any passenger
     to this flight
 - Get flight details
   - Flight for passenger join companies join cities, consolidate cities

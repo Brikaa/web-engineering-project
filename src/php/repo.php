@@ -11,25 +11,44 @@ function with_prepared_statement(mysqli $con, string $sql, $fn)
   return $res;
 }
 
-function execute_statement(mysqli $con, string $sql, string $binding, array $params)
+function with_executed_statement(mysqli $con, string $sql, string $binding, array $params, Closure $fn)
 {
-  return with_prepared_statement($con, $sql, function ($s) use (&$binding, &$params) {
+  return with_prepared_statement($con, $sql, function ($s) use (&$binding, &$params, $fn) {
     $s->bind_param($binding, ...$params);
-    return $s->execute();
+    if ($s->execute()) {
+      return $fn($s);
+    }
+    return null;
   });
 }
 
-function select_one(mysqli $con, string $sql, string $binding, array $params)
+function execute_statement(mysqli $con, string $sql, string $binding, array $params): ?mysqli_stmt
 {
-  return with_prepared_statement($con, $sql, function ($s) use (&$binding, &$params) {
-    $s->bind_param($binding, ...$params);
-    if ($s->execute()) {
-      $res = $s->get_result();
-      if ($res) {
-        return $res->fetch_array();
-      }
+  return with_executed_statement($con, $sql, $binding, $params, function ($s) {
+    return $s;
+  });
+}
+
+function select_one(mysqli $con, string $sql, string $binding, array $params): ?array
+{
+  return with_executed_statement($con, $sql, $binding, $params, function (mysqli_stmt $s) {
+    if ($res = $s->get_result()) {
+      return $res->fetch_array();
     }
     return null;
+  });
+}
+
+function select_all(mysqli $con, string $sql, string $binding, array $params): array
+{
+  return with_executed_statement($con, $sql, $binding, $params, function (mysqli_stmt $s) {
+    $arr = array();
+    while ($res = $s->get_result()) {
+      if ($e = $res->fetch_array()) {
+        $arr[] = $e;
+      }
+    }
+    return $arr;
   });
 }
 
@@ -37,9 +56,10 @@ function select_user_by_condition(mysqli $con, string $condition, string $bindin
 {
   $user = select_one(
     $con,
-    "SELECT User.id, User.name, Passenger.id, Company.id FROM User WHERE $condition
+    "SELECT User.id, User.name, Passenger.id, Company.id FROM User
     LEFT JOIN Company ON Company.user_id = User.user_id
-    LEFT JOIN Passenger ON Passenger.user_id = User.user_id",
+    LEFT JOIN Passenger ON Passenger.user_id = User.user_id
+    WHERE $condition",
     $binding,
     $params
   );
@@ -55,6 +75,52 @@ function select_user_by_condition(mysqli $con, string $condition, string $bindin
     return new UserContext($user[0], $user[1], $role);
   }
   return null;
+}
+
+function select__flights_summaries_for_user_by_date_condition(
+  mysqli $con,
+  string $date_condition,
+  string $user_id
+): array
+{
+  $arr = select_all(
+    $con,
+    "SELECT
+      Flight.id,
+      Flight.name,
+      Company.name,
+      Flight.price,
+      StartCity.name,
+      StartCity.date_in_city,
+      EndCity.name,
+      EndCity.date_in_city
+    FROM FlightReservation
+      LEFT JOIN Flight ON FlightReservation.flight_id = Flight.id
+      LEFT JOIN
+        (SELECT C.name, C.date_in_city FROM FlightCity AS C ORDER BY C.date_in_city ASC LIMIT 1)
+      AS StartCity ON StartCity.flight_id = Flight.id
+      LEFT JOIN
+        (SELECT C.name, C.date_in_city FROM FlightCity AS C ORDER BY C.date_in_city DESC LIMIT 1)
+      AS EndCity ON EndCity.flight_id = Flight.id
+      LEFT JOIN Company ON Company.user_id = Flight.company_user_id
+    WHERE
+      FlightReservation.passenger_user_id = ?
+      AND $date_condition",
+    "s",
+    [$user_id]
+  );
+  $res = array();
+  foreach ($arr as $row) {
+    $res[] = new FlightSummary(
+      $row[0],
+      $row[1],
+      $row[2],
+      $row[3],
+      new FlightCity($row[4], $row[5]),
+      new FlightCity($row[6], $row[7])
+    );
+  }
+  return $res;
 }
 
 class Repo
@@ -179,5 +245,17 @@ class Repo
       return new Company($company[0], $company[1], $company[2]);
     }
     return null;
+  }
+
+  public function select_upcoming_flights_summaries_for_user(mysqli $con, string $user_id): array
+  {
+    $now = date("Y-m-d H:i:s");
+    return select__flights_summaries_for_user_by_date_condition($con, "StartCity.date_in_city > $now", $user_id);
+  }
+
+  public function select_completed_flights_summaries_for_user(mysqli $con, string $user_id): array
+  {
+    $now = date("Y-m-d H:i:s");
+    return select__flights_summaries_for_user_by_date_condition($con, "EndCity.date_in_city < $now", $user_id);
   }
 }

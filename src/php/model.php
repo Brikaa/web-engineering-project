@@ -72,31 +72,31 @@ final class Passenger
   }
 }
 
-final class City
+final class FlightCity
 {
   public string $name;
   public DateTime $date_in_city;
 }
 
-class BareCity {
+class BareFlight {
   public string $id;
   public string $name;
   public string $company_name;
   public float $price;
 }
 
-final class FlightSummary extends BareCity
+final class FlightSummary extends BareFlight
 {
-  public City $source;
-  public City $destination;
+  public FlightCity $source;
+  public FlightCity $destination;
 
   public function __construct(
     string $id,
     string $name,
     string $company_name,
     float $price,
-    City $source,
-    City $destination
+    FlightCity $source,
+    FlightCity $destination
   ) {
     $this->id = $id;
     $this->name = $name;
@@ -107,7 +107,7 @@ final class FlightSummary extends BareCity
   }
 }
 
-final class FlightDetail extends BareCity
+final class FlightDetail extends BareFlight
 {
   public array $cities;
 
