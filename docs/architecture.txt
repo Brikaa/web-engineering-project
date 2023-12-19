@@ -55,4 +55,4 @@
     to this flight and the max number of passengers is more than the number of flight reservations from any passenger
     to this flight
 - Get flight details
-  - Flight for passenger join companies join cities, consolidate cities
+  - Flight id join companies join cities, consolidate cities

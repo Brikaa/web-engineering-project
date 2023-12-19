@@ -299,4 +299,35 @@ class Repo
       [$user_id, $flight_id]
     ) != null;
   }
+
+  public function select_flight_details_for_flight_id(mysqli $con, string $flight_id): ?FlightDetail
+  {
+    $flights_with_cities = select_all(
+      $con,
+      "SELECT Flight.id, Flight.name, Flight.price, Company.name, City.name, City.date_in_city
+      FROM Flight
+      LEFT JOIN
+        Company ON Flight.company_user_id = Company.user_id
+      LEFT JOIN
+        FlightCity ON FlightCity.flight_id = Flight.id
+      WHERE Flight.id = ?",
+      "s",
+      [$flight_id]
+    );
+    if (count($flights_with_cities) < 1) {
+      return null;
+    } else {
+      $cities = array();
+      foreach ($flights_with_cities as $row) {
+        $cities[] = new FlightCity($row[4], new DateTime($row[5]));
+      }
+      return new FlightDetail(
+        $flights_with_cities[0][0],
+        $flights_with_cities[0][1],
+        $flights_with_cities[0][3],
+        $flights_with_cities[0][2],
+        $cities
+      );
+    }
+  }
 }
