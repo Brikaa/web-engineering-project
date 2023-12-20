@@ -284,6 +284,27 @@ class Repo
     );
   }
 
+  public function select_available_flights_summaries_for_user_by_src_dest(
+    mysqli $con,
+    string $user_id,
+    string $src,
+    string $dest
+  ): array {
+    $now = date("Y-m-d H:i:s");
+    return select_flights_summaries_by_condition(
+      $con,
+      "Flight",
+      "StartCity.date_in_city > $now
+      AND Flight.id NOT IN (
+        SELECT FlightReservation.flight_id FROM FlightReservation WHERE FlightReservation.passenger_user_id = ?
+      )
+      AND StartCity.name LIKE %?%
+      AND EndCity.name LIKE %?%",
+      "sss",
+      [$user_id, $src, $dest]
+    );
+  }
+
   public function flight_reservation_by_user_id_and_flight_id_exists(
     mysqli $con,
     string $user_id,
@@ -300,17 +321,25 @@ class Repo
     ) != null;
   }
 
-  public function select_flight_details_for_flight_id(mysqli $con, string $flight_id): ?FlightDetail
+  public function select_flight_details_by_flight_id(mysqli $con, string $flight_id): ?FlightDetail
   {
     $flights_with_cities = select_all(
       $con,
-      "SELECT Flight.id, Flight.name, Flight.price, Company.name, City.name, City.date_in_city
+      "SELECT
+        Flight.id,
+        Flight.name,
+        Flight.price,
+        Company.name,
+        Flight.max_passengers,
+        COUNT(FlightReservation.id),
+        City.name,
+        City.date_in_city
       FROM Flight
-      LEFT JOIN
-        Company ON Flight.company_user_id = Company.user_id
-      LEFT JOIN
-        FlightCity ON FlightCity.flight_id = Flight.id
-      WHERE Flight.id = ?",
+      LEFT JOIN Company ON Flight.company_user_id = Company.user_id
+      LEFT JOIN FlightCity ON FlightCity.flight_id = Flight.id
+      LEFT JOIN FlightReservation ON FlightReservation.flight_id = Flight.id
+      WHERE Flight.id = ?
+      GROUP BY FlightReservation.id",
       "s",
       [$flight_id]
     );
@@ -319,14 +348,16 @@ class Repo
     } else {
       $cities = array();
       foreach ($flights_with_cities as $row) {
-        $cities[] = new FlightCity($row[4], new DateTime($row[5]));
+        $cities[] = new FlightCity($row[6], new DateTime($row[7]));
       }
       return new FlightDetail(
         $flights_with_cities[0][0],
         $flights_with_cities[0][1],
-        $flights_with_cities[0][3],
         $flights_with_cities[0][2],
-        $cities
+        $flights_with_cities[0][3],
+        $flights_with_cities[0][4],
+        $flights_with_cities[0][5],
+        $cities,
       );
     }
   }

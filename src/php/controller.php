@@ -53,8 +53,10 @@ class DbController
     $this->session[USER_ID] = $user->id;
   }
 
-  public function get_logged_in_user()
+  public function get_logged_in_user_context()
   {
+    $user_id = $this->session[USER_ID];
+    return $this->repo->select_user_by_id($this->con, $user_id);
   }
 
   public function update_user(

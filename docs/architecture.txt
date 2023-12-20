@@ -56,3 +56,40 @@
     to this flight
 - Get flight details
   - Flight id join companies join cities, consolidate cities
+
+- Guest
+  - Login
+    - Select by name and password exists
+    - Set session
+  - Register
+    - Check if user by name or email exists
+    - Insert user
+- User
+  - View profile
+    - Select user, passenger/company
+  - Edit profile
+    - Update user, passenger/company
+  * These include the additional company/passenger info
+- Passenger
+  - List of completed flights
+    - Select completed flights
+  - List of upcoming flights for user
+    - Select upcoming flights for user
+  - List all available flights
+    - Select available flights for user
+  - View flight details
+    - Select flight
+  - Search flight
+    - Search flight by source and destination
+  - Book flight
+    - Insert FlightReservation, update user
+  - Cancel flight reservation
+    - Delete FlightReservation, update user
+  - Message company
+    - Insert message
+- Company
+  - List own flights
+  - Add flight
+  - Cancel flight
+  - View messages
+  - Reply to message
