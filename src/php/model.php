@@ -132,3 +132,16 @@ final class FlightDetail extends BareFlight
     $this->registered_passengers = $registered_passengers;
   }
 }
+
+final class Message
+{
+  public string $id;
+  public string $second_party_name;
+  public string $message;
+
+  public function __construct(string $id, string $second_party_name, string $message)
+  {
+    $this->second_party_name = $second_party_name;
+    $this->message = $message;
+  }
+}

@@ -253,7 +253,7 @@ class Repo
     return null;
   }
 
-  public function select_upcoming_flights_summaries_for_user(mysqli $con, string $user_id): array
+  public function select_upcoming_flights_summaries_for_passenger(mysqli $con, string $user_id): array
   {
     $now = date("Y-m-d H:i:s");
     return $this->select_flights_summaries_by_condition(
@@ -265,7 +265,7 @@ class Repo
     );
   }
 
-  public function select_completed_flights_summaries_for_user(mysqli $con, string $user_id): array
+  public function select_completed_flights_summaries_for_passenger(mysqli $con, string $user_id): array
   {
     $now = date("Y-m-d H:i:s");
     return $this->select_flights_summaries_by_condition(
@@ -277,7 +277,7 @@ class Repo
     );
   }
 
-  public function select_available_flights_summaries_for_user(mysqli $con, string $user_id): array
+  public function select_available_flights_summaries_for_passenger(mysqli $con, string $user_id): array
   {
     $now = date("Y-m-d H:i:s");
     return $this->select_flights_summaries_by_condition(
@@ -292,7 +292,7 @@ class Repo
     );
   }
 
-  public function select_available_flights_summaries_for_user_by_src_dest(
+  public function select_available_flights_summaries_for_passenger_by_src_dest(
     mysqli $con,
     string $user_id,
     string $src,
@@ -310,6 +310,17 @@ class Repo
       AND EndCity.name LIKE %?%",
       "sss",
       [$user_id, $src, $dest]
+    );
+  }
+
+  public function select_flights_summaries_for_company(mysqli $con, string $user_id)
+  {
+    return $this->select_flights_summaries_by_condition(
+      $con,
+      "Flight",
+      "Company.user_id = ?",
+      "s",
+      [$user_id]
     );
   }
 
@@ -390,13 +401,37 @@ class Repo
     );
   }
 
-  public function change_money_for_user(mysqli $con, string $user_id, float $delta): bool
-  {
+  private function change_money_by_condition(
+    mysqli $con,
+    string $condition,
+    string $bindings,
+    array $params,
+    float $delta
+  ): bool {
+    array_unshift($params, $delta);
     return $this->execute_statement(
       $con,
-      "UPDATE User SET User.money = User.money + ? WHERE User.id = ?",
-      "ds",
-      [$delta, $user_id]
+      "UPDATE User SET User.money = User.money + ? WHERE $condition",
+      "d" . $bindings,
+      $params
+    );
+  }
+
+  public function change_money_for_user(mysqli $con, string $user_id, float $delta): bool
+  {
+    return $this->change_money_by_condition($con, "User.id = ?", "s", [$user_id], $delta);
+  }
+
+  public function change_money_for_registered_passenger(mysqli $con, string $flight_id, float $delta)
+  {
+    return $this->change_money_by_condition(
+      $con,
+      "User.id IN (
+        SELECT FlightReservation.passenger_user_id FROM FlightReservation WHERE FlightReservation.flight_id = ?
+      )",
+      "s",
+      [$flight_id],
+      $delta
     );
   }
 
@@ -408,5 +443,60 @@ class Repo
       "sss",
       [$sender_id, $receiver_id, $message]
     );
+  }
+
+  public function insert_flight_for_company(
+    mysqli $con,
+    string $user_id,
+    string $name,
+    int $max_passengers,
+    float $price
+  ) {
+    return $this->execute_statement(
+      $con,
+      "INSERT INTO Flight (`company_user_id`, `name`, max_passengers, price) VALUES (?, ?, ?, ?)",
+      "ssid",
+      [$user_id, $name, $max_passengers, $price]
+    );
+  }
+
+  public function delete_flight(
+    mysqli $con,
+    string $flight_id
+  ) {
+    return $this->execute_statement(
+      $con,
+      "DELETE FROM Flight WHERE Flight.id = ?",
+      "s",
+      [$flight_id]
+    );
+  }
+
+  public function select_messages_for_user(mysqli $con, string $user_id, string $first_party, string $second_party)
+  {
+    $rows = $this->select_all(
+      $con,
+      "SELECT Message.id, Message.message, User.name
+      FROM `Message`
+      LEFT JOIN User ON `Message`." . $second_party . "_user_id = User.id
+      WHERE Message." . $first_party . "_user_id = ?",
+      "s",
+      [$user_id]
+    );
+    $res = array();
+    foreach ($rows as $row) {
+      $res[] = new Message($row[0], $row[1], $row[2]);
+    }
+    return $res;
+  }
+
+  public function select_received_messages_for_user(mysqli $con, string $user_id)
+  {
+    return $this->select_messages_for_user($con, $user_id, "receiver", "sender");
+  }
+
+  public function select_sent_messages_for_user(mysqli $con, string $user_id)
+  {
+    return $this->select_messages_for_user($con, $user_id, "sender", "receiver");
   }
 }

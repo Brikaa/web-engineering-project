@@ -87,9 +87,12 @@
     - Delete FlightReservation, update user
   - Message company
     - Insert message
+  - View received messages
+  - View sent messages
 - Company
   - List own flights
   - Add flight
   - Cancel flight
-  - View messages
+  - View received messages
+  - View sent messages
   - Reply to message
