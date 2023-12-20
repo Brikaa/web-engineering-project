@@ -3,132 +3,142 @@
 declare(strict_types=1);
 require_once 'model.php';
 
-function with_prepared_statement(mysqli $con, string $sql, $fn)
-{
-  $stmt = $con->prepare($sql);
-  $res = $fn($stmt);
-  $stmt->close();
-  return $res;
-}
-
-function with_executed_statement(mysqli $con, string $sql, string $binding, array $params, Closure $fn)
-{
-  return with_prepared_statement($con, $sql, function ($s) use (&$binding, &$params, $fn) {
-    $s->bind_param($binding, ...$params);
-    if ($s->execute()) {
-      return $fn($s);
-    }
-    return null;
-  });
-}
-
-function execute_statement(mysqli $con, string $sql, string $binding, array $params): ?mysqli_stmt
-{
-  return with_executed_statement($con, $sql, $binding, $params, function ($s) {
-    return $s;
-  });
-}
-
-function select_one(mysqli $con, string $sql, string $binding, array $params): ?array
-{
-  return with_executed_statement($con, $sql, $binding, $params, function (mysqli_stmt $s) {
-    if ($res = $s->get_result()) {
-      return $res->fetch_array();
-    }
-    return null;
-  });
-}
-
-function select_all(mysqli $con, string $sql, string $binding, array $params): array
-{
-  return with_executed_statement($con, $sql, $binding, $params, function (mysqli_stmt $s) {
-    $arr = array();
-    while ($res = $s->get_result()) {
-      if ($e = $res->fetch_array()) {
-        $arr[] = $e;
-      }
-    }
-    return $arr;
-  });
-}
-
-function select_user_by_condition(mysqli $con, string $condition, string $binding, array $params): ?UserContext
-{
-  $user = select_one(
-    $con,
-    "SELECT User.id, User.name, Passenger.id, Company.id FROM User
-    LEFT JOIN Company ON Company.user_id = User.user_id
-    LEFT JOIN Passenger ON Passenger.user_id = User.user_id
-    WHERE $condition",
-    $binding,
-    $params
-  );
-  if ($user) {
-    $role = NONE_ROLE;
-    if ($user[2] == null && $user[3] == null) {
-      $role = NONE_ROLE;
-    } else if ($user[2] != null) {
-      $role = PASSENGER_ROLE;
-    } else {
-      $role = COMPANY_ROLE;
-    }
-    return new UserContext($user[0], $user[1], $role);
-  }
-  return null;
-}
-
-function select_flights_summaries_by_condition(
-  mysqli $con,
-  string $from,
-  string $condition,
-  string $bindings,
-  array $params,
-): array {
-  $arr = select_all(
-    $con,
-    "SELECT
-      Flight.id,
-      Flight.name,
-      Company.name,
-      Flight.price,
-      StartCity.name,
-      StartCity.date_in_city,
-      EndCity.name,
-      EndCity.date_in_city
-    FROM $from
-      LEFT JOIN
-        (SELECT C.name, C.date_in_city FROM FlightCity AS C ORDER BY C.date_in_city ASC LIMIT 1)
-      AS StartCity ON StartCity.flight_id = Flight.id
-      LEFT JOIN
-        (SELECT C.name, C.date_in_city FROM FlightCity AS C ORDER BY C.date_in_city DESC LIMIT 1)
-      AS EndCity ON EndCity.flight_id = Flight.id
-      LEFT JOIN Company ON Company.user_id = Flight.company_user_id
-    WHERE $condition",
-    $bindings,
-    $params
-  );
-  $res = array();
-  foreach ($arr as $row) {
-    $res[] = new FlightSummary(
-      $row[0],
-      $row[1],
-      $row[2],
-      $row[3],
-      new FlightCity($row[4], $row[5]),
-      new FlightCity($row[6], $row[7])
-    );
-  }
-  return $res;
-}
-
 class Repo
 {
+  private mysqli $con;
+
+  public function __construct()
+  {
+    $this->con = mysqli_connect("wep-db", "user", "user123", "app");
+  }
+
+  function __destruct()
+  {
+    $this->con->close();
+  }
+
+
+  private function with_prepared_statement(string $sql, $fn)
+  {
+    $stmt = $this->con->prepare($sql);
+    $res = $fn($stmt);
+    $stmt->close();
+    return $res;
+  }
+
+  private function with_executed_statement(string $sql, string $binding, array $params, Closure $fn)
+  {
+    return $this->with_prepared_statement($sql, function ($s) use (&$binding, &$params, $fn) {
+      $s->bind_param($binding, ...$params);
+      if ($s->execute()) {
+        return $fn($s);
+      }
+      return null;
+    });
+  }
+
+  private function execute_statement(string $sql, string $binding, array $params): ?bool
+  {
+    return $this->with_executed_statement($sql, $binding, $params, function ($s) {
+      return $s != null && $s != false;
+    });
+  }
+
+  private function select_one(string $sql, string $binding, array $params): ?array
+  {
+    return $this->with_executed_statement($sql, $binding, $params, function (mysqli_stmt $s) {
+      if ($res = $s->get_result()) {
+        return $res->fetch_array();
+      }
+      return null;
+    });
+  }
+
+  private function select_all(string $sql, string $binding, array $params): array
+  {
+    return $this->with_executed_statement($sql, $binding, $params, function (mysqli_stmt $s) {
+      $arr = array();
+      while ($res = $s->get_result()) {
+        if ($e = $res->fetch_array()) {
+          $arr[] = $e;
+        }
+      }
+      return $arr;
+    });
+  }
+
+  private function select_user_by_condition(string $condition, string $binding, array $params): ?UserContext
+  {
+    $user = $this->select_one(
+      "SELECT User.id, User.name, Passenger.id, Company.id FROM User
+      LEFT JOIN Company ON Company.user_id = User.user_id
+      LEFT JOIN Passenger ON Passenger.user_id = User.user_id
+      WHERE $condition",
+      $binding,
+      $params
+    );
+    if ($user) {
+      $role = NONE_ROLE;
+      if ($user[2] == null && $user[3] == null) {
+        $role = NONE_ROLE;
+      } else if ($user[2] != null) {
+        $role = PASSENGER_ROLE;
+      } else {
+        $role = COMPANY_ROLE;
+      }
+      return new UserContext($user[0], $user[1], $role);
+    }
+    return null;
+  }
+
+  private function select_flights_summaries_by_condition(
+
+    string $from,
+    string $condition,
+    string $bindings,
+    array $params,
+  ): array {
+    $arr = $this->select_all(
+      "SELECT
+        Flight.id,
+        Flight.name,
+        Company.name,
+        Flight.price,
+        StartCity.name,
+        StartCity.date_in_city,
+        EndCity.name,
+        EndCity.date_in_city
+      FROM $from
+        LEFT JOIN
+          (SELECT C.name, C.date_in_city FROM FlightCity AS C ORDER BY C.date_in_city ASC LIMIT 1)
+        AS StartCity ON StartCity.flight_id = Flight.id
+        LEFT JOIN
+          (SELECT C.name, C.date_in_city FROM FlightCity AS C ORDER BY C.date_in_city DESC LIMIT 1)
+        AS EndCity ON EndCity.flight_id = Flight.id
+        LEFT JOIN Company ON Company.user_id = Flight.company_user_id
+      WHERE $condition",
+      $bindings,
+      $params
+    );
+    $res = array();
+    foreach ($arr as $row) {
+      $res[] = new FlightSummary(
+        $row[0],
+        $row[1],
+        $row[2],
+        $row[3],
+        new FlightCity($row[4], $row[5]),
+        new FlightCity($row[6], $row[7])
+      );
+    }
+    return $res;
+  }
+
   public function insert_user(
-    mysqli $con,
+
     InsertUserRequest $user
-  ) {
-    return execute_statement(
-      $con,
+  ): bool {
+    return $this->execute_statement(
       "INSERT INTO User(`email`, `name`, `password`, `telephone`, `photo_url`, `money`) values(?, ?, ?, ?, ?, ?)",
       "sssssd",
       [$user->email, $user->name, $user->password, $user->telephone, $user->photo_url, $user->money]
@@ -136,12 +146,11 @@ class Repo
   }
 
   public function insert_passenger_for_user_id(
-    mysqli $con,
+
     string $user_id,
     string $passport_image_url
-  ) {
-    return execute_statement(
-      $con,
+  ): bool {
+    return $this->execute_statement(
       "INSERT INTO Passenger(`user_id`, `passport_image_url`) values(?, ?)",
       "ss",
       [$user_id, $passport_image_url]
@@ -149,13 +158,12 @@ class Repo
   }
 
   public function insert_company_for_user_id(
-    mysqli $con,
+
     string $user_id,
     string $bio,
     string $address
-  ) {
-    return execute_statement(
-      $con,
+  ): bool {
+    return $this->execute_statement(
       "INSERT INTO Passenger(`user_id`, `bio`, `address`) values(?, ?, ?)",
       "sss",
       [$user_id, $bio, $address]
@@ -163,12 +171,11 @@ class Repo
   }
 
   public function update_user_by_id(
-    mysqli $con,
+
     string $id,
     InsertUserRequest $user
-  ) {
-    return execute_statement(
-      $con,
+  ): bool {
+    return $this->execute_statement(
       "UPDATE User SET `email`=?, `name`=?, `password`=?, `telephone`=?, `photo_url`=?, `money`=? WHERE id=?",
       "sssssds",
       [$user->email, $user->name, $user->password, $user->telephone, $user->photo_url, $user->money, $id]
@@ -176,12 +183,11 @@ class Repo
   }
 
   public function update_passenger_by_user_id(
-    mysqli $con,
+
     string $user_id,
     string $passport_image_url
-  ) {
-    return execute_statement(
-      $con,
+  ): bool {
+    return $this->execute_statement(
       "UPDATE Passenger SET passport_image_url=? WHERE user_id=?",
       "ss",
       [$passport_image_url, $user_id]
@@ -189,38 +195,36 @@ class Repo
   }
 
   public function update_company_by_user_id(
-    mysqli $con,
+
     string $user_id,
     string $bio,
     string $address
-  ) {
-    return execute_statement(
-      $con,
+  ): bool {
+    return $this->execute_statement(
       "UPDATE Company SET bio=?, `address`=? WHERE user_id=?",
       "sss",
       [$bio, $address, $user_id]
     );
   }
 
-  public function select_user_by_id(mysqli $con, string $id)
+  public function select_user_by_id(string $id)
   {
-    return select_user_by_condition($con, "User.id=?", "s", [$id]);
+    return $this->select_user_by_condition("User.id=?", "s", [$id]);
   }
 
-  public function select_user_by_name_or_email(mysqli $con, string $name, string $email)
+  public function select_user_by_name_or_email(string $name, string $email)
   {
-    return select_user_by_condition($con, "User.name=? OR User.email=?", "ss", [$name, $email]);
+    return $this->select_user_by_condition("User.name=? OR User.email=?", "ss", [$name, $email]);
   }
 
-  public function select_user_by_email_and_password(mysqli $con, string $email, string $password)
+  public function select_user_by_email_and_password(string $email, string $password)
   {
-    return select_user_by_condition($con, "User.email = ? AND User.password = ?", "ss", [$email, $password]);
+    return $this->select_user_by_condition("User.email = ? AND User.password = ?", "ss", [$email, $password]);
   }
 
-  public function select_passenger_by_user_id(mysqli $con, string $user_id): ?Passenger
+  public function select_passenger_by_user_id(string $user_id): ?Passenger
   {
-    $passenger = select_one(
-      $con,
+    $passenger = $this->select_one(
       "SELECT Passenger.user_id, Passenger.passport_image_url FROM Passenger WHERE Passenger.user_id = ?",
       "s",
       [$user_id]
@@ -231,10 +235,9 @@ class Repo
     return null;
   }
 
-  public function select_company_by_user_id(mysqli $con, string $user_id): ?Company
+  public function select_company_by_user_id(string $user_id): ?Company
   {
-    $company = select_one(
-      $con,
+    $company = $this->select_one(
       "SELECT Company.user_id, Company.bio, Company.address FROM Company WHERE Company.user_id = ?",
       "s",
       [$user_id]
@@ -245,11 +248,10 @@ class Repo
     return null;
   }
 
-  public function select_upcoming_flights_summaries_for_user(mysqli $con, string $user_id): array
+  public function select_upcoming_flights_summaries_for_user(string $user_id): array
   {
     $now = date("Y-m-d H:i:s");
-    return select_flights_summaries_by_condition(
-      $con,
+    return $this->select_flights_summaries_by_condition(
       "FlightReservation LEFT JOIN Flight ON FlightReservation.flight_id = Flight.id",
       "FlightReservation.passenger_user_id = ? AND StartCity.date_in_city > $now",
       "s",
@@ -257,11 +259,10 @@ class Repo
     );
   }
 
-  public function select_completed_flights_summaries_for_user(mysqli $con, string $user_id): array
+  public function select_completed_flights_summaries_for_user(string $user_id): array
   {
     $now = date("Y-m-d H:i:s");
-    return select_flights_summaries_by_condition(
-      $con,
+    return $this->select_flights_summaries_by_condition(
       "FlightReservation LEFT JOIN Flight ON FlightReservation.flight_id = Flight.id",
       "FlightReservation.passenger_user_id = ? AND EndCity.date_in_city < $now",
       "s",
@@ -269,11 +270,10 @@ class Repo
     );
   }
 
-  public function select_available_flights_summaries_for_user(mysqli $con, string $user_id): array
+  public function select_available_flights_summaries_for_user(string $user_id): array
   {
     $now = date("Y-m-d H:i:s");
-    return select_flights_summaries_by_condition(
-      $con,
+    return $this->select_flights_summaries_by_condition(
       "Flight",
       "StartCity.date_in_city > $now
       AND Flight.id NOT IN (
@@ -285,14 +285,13 @@ class Repo
   }
 
   public function select_available_flights_summaries_for_user_by_src_dest(
-    mysqli $con,
+
     string $user_id,
     string $src,
     string $dest
   ): array {
     $now = date("Y-m-d H:i:s");
-    return select_flights_summaries_by_condition(
-      $con,
+    return $this->select_flights_summaries_by_condition(
       "Flight",
       "StartCity.date_in_city > $now
       AND Flight.id NOT IN (
@@ -306,12 +305,11 @@ class Repo
   }
 
   public function flight_reservation_by_user_id_and_flight_id_exists(
-    mysqli $con,
+
     string $user_id,
     string $flight_id
   ): bool {
-    return select_one(
-      $con,
+    return $this->select_one(
       "SELECT FlightReservation.flight_id FROM FlightReservation
       WHERE
         FlightReservation.passenger_user_id = ?
@@ -321,10 +319,9 @@ class Repo
     ) != null;
   }
 
-  public function select_flight_details_by_flight_id(mysqli $con, string $flight_id): ?FlightDetail
+  public function select_flight_details_by_flight_id(string $flight_id): ?FlightDetail
   {
-    $flights_with_cities = select_all(
-      $con,
+    $flights_with_cities = $this->select_all(
       "SELECT
         Flight.id,
         Flight.name,
@@ -339,7 +336,7 @@ class Repo
       LEFT JOIN FlightCity ON FlightCity.flight_id = Flight.id
       LEFT JOIN FlightReservation ON FlightReservation.flight_id = Flight.id
       WHERE Flight.id = ?
-      GROUP BY FlightReservation.id",
+      GROUP BY City.name",
       "s",
       [$flight_id]
     );
@@ -360,5 +357,32 @@ class Repo
         $cities,
       );
     }
+  }
+
+  public function insert_flight_reservation_for_user(string $user_id, string $flight_id): bool
+  {
+    return $this->execute_statement(
+      "INSERT INTO FlightReservation(passenger_user_id, flight_id) VALUES (?, ?)",
+      "ss",
+      [$user_id, $flight_id]
+    );
+  }
+
+  public function delete_flight_reservation(string $flight_reservation_id): bool
+  {
+    return $this->execute_statement(
+      "DELETE FROM FlightReservation WHERE id = ?",
+      "s",
+      [$flight_reservation_id]
+    );
+  }
+
+  public function change_user_money_for_user(string $user_id, float $delta): bool
+  {
+    return $this->execute_statement(
+      "UPDATE User SET User.money = User.money + ? WHERE User.id = ?",
+      "ds",
+      [$delta, $user_id]
+    );
   }
 }

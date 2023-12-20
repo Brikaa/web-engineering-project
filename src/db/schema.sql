@@ -9,7 +9,7 @@ CREATE TABLE User (
   `password` varchar(256) NOT NULL,
   `telephone` varchar(128) NOT NULL,
   `photo_url` varchar(256) NOT NULL,
-  `money` INT NOT NULL
+  `money` FLOAT NOT NULL
 );
 
 CREATE TABLE Passenger (
@@ -32,7 +32,7 @@ CREATE TABLE Flight (
   `company_user_id` varchar(36) NOT NULL,
   `name` varchar(1024) NOT NULL,
   `max_passengers` INT NOT NULL,
-  `price` DOUBLE NOT NULL,
+  `price` FLOAT NOT NULL,
   CONSTRAINT FK_FLIGHT_COMPANY FOREIGN KEY (company_user_id) REFERENCES User(id) ON DELETE CASCADE
 );
 
@@ -55,3 +55,14 @@ CREATE TABLE FlightCity (
   UNIQUE KEY UQ_FLIGHT_CITY (`flight_id`, `name`),
   CONSTRAINT FK_FLIGHT_CITY FOREIGN KEY (flight_id) REFERENCES Flight(id) ON DELETE CASCADE
 );
+
+CREATE TABLE Message {
+  `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
+  `message` TEXT NOT NULL,
+  `sender_user_id` varchar(36) NOT NULL,
+  `receiver_user_id` varchar(36) NOT NULL,
+  `message_replied_to_id` varchar(36),
+  CONSTRAINT FK_MESSAGE_SENDER FOREIGN KEY (sender_user_id) REFERENCES User(id) ON DELETE CASCADE,
+  CONSTRAINT FK_MESSAGE_RECEIVER FOREIGN KEY (receiver_user_id) REFERENCES User(id) ON DELETE CASCADE,
+  CONSTRAINT FK_MESSAGE_MESSAGE FOREIGN KEY (message_replied_to_id) REFERENCES `Message`(id)
+}
