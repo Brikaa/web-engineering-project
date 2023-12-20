@@ -61,8 +61,6 @@ CREATE TABLE Message {
   `message` TEXT NOT NULL,
   `sender_user_id` varchar(36) NOT NULL,
   `receiver_user_id` varchar(36) NOT NULL,
-  `message_replied_to_id` varchar(36),
   CONSTRAINT FK_MESSAGE_SENDER FOREIGN KEY (sender_user_id) REFERENCES User(id) ON DELETE CASCADE,
   CONSTRAINT FK_MESSAGE_RECEIVER FOREIGN KEY (receiver_user_id) REFERENCES User(id) ON DELETE CASCADE,
-  CONSTRAINT FK_MESSAGE_MESSAGE FOREIGN KEY (message_replied_to_id) REFERENCES `Message`(id)
 }

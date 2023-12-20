@@ -92,7 +92,6 @@ class Repo
   }
 
   private function select_flights_summaries_by_condition(
-
     string $from,
     string $condition,
     string $bindings,
@@ -377,12 +376,21 @@ class Repo
     );
   }
 
-  public function change_user_money_for_user(string $user_id, float $delta): bool
+  public function change_money_for_user(string $user_id, float $delta): bool
   {
     return $this->execute_statement(
       "UPDATE User SET User.money = User.money + ? WHERE User.id = ?",
       "ds",
       [$delta, $user_id]
+    );
+  }
+
+  public function insert_message(string $sender_id, string $receiver_id, string $message)
+  {
+    return $this->execute_statement(
+      "INSERT INTO `Message` (sender_user_id, receiver_user_id, `message`) VALUES (?, ?, ?)",
+      "sss",
+      [$sender_id, $receiver_id, $message]
     );
   }
 }
