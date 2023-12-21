@@ -14,5 +14,4 @@ $login_view = function () use (&$with_landing_template) {
     </div>
   </div>
   HTML);
-}
-?>
+};

@@ -31,8 +31,10 @@ CREATE TABLE Flight (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
   `company_user_id` varchar(36) NOT NULL,
   `name` varchar(1024) NOT NULL,
-  `max_passengers` INT NOT NULL,
+  `max_passengers` UNSIGNED INT NOT NULL,
   `price` FLOAT NOT NULL,
+  CONSTRAINT CHECK_POSITIVE_MAX_PASSENGERS CHECK ((`max_passengers` > 0)),
+  CONSTRAINT CHECK_POSITIVE_PRICE CHECK ((`price` >= 0)),
   CONSTRAINT FK_FLIGHT_COMPANY FOREIGN KEY (company_user_id) REFERENCES User(id) ON DELETE CASCADE
 );
 

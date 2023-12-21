@@ -18,6 +18,17 @@ class DbController
     $this->session = &$session;
   }
 
+  private function upload_image(string $temp_file_path, string $user_id): string
+  {
+    if (!getimagesize($temp_file_path)) {
+      throw new Error("File is not an image");
+    }
+    $path = "cnd/$user_id";
+    if (!move_uploaded_file($temp_file_path, $path))
+      throw new Error("Failed to upload the file");
+    return $path;
+  }
+
   public function signup(
     mysqli $con,
     string $email,
@@ -73,17 +84,36 @@ class DbController
   public function update_user(
     mysqli $con,
     UserContext $ctx,
-    InsertUserRequest $req
+    string $email,
+    string $name,
+    string $password,
+    string $telephone,
+    string $temp_photo_url
   ): bool {
-    return $this->repo->update_user_by_id($con, $ctx->id, $req);
+    return $this->repo->update_user_by_id(
+      $con,
+      $ctx->id,
+      new InsertUserRequest(
+        $email,
+        $name,
+        $password,
+        $telephone,
+        $this->upload_image($temp_photo_url, $ctx->id),
+        $ctx->money
+      )
+    );
   }
 
   public function update_passenger(
     mysqli $con,
     UserContext $ctx,
-    string $passport_image_url
+    string $temp_passport_image_url
   ): bool {
-    return $this->repo->update_passenger_by_user_id($con, $ctx->id, $passport_image_url);
+    return $this->repo->update_passenger_by_user_id(
+      $con,
+      $ctx->id,
+      $this->upload_image($temp_passport_image_url, $ctx->id)
+    );
   }
 
   public function update_company(
@@ -207,6 +237,10 @@ class DbController
 
   public function add_flight(mysqli $con, UserContext $ctx, string $name, int $max_passengers, float $price): bool
   {
+    if ($max_passengers <= 0)
+      throw new Error("The maximum number of passengers must be a positive number");
+    if ($price < 0)
+      throw new Error("The price must be a positive number");
     return $this->repo->insert_flight_for_company($con, $ctx->id, $name, $max_passengers, $price);
   }
 
