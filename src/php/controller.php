@@ -24,12 +24,12 @@ class DbController
     string $name,
     string $password,
     string $telephone
-  ) {
+  ): bool {
     if ($this->repo->select_user_by_name_or_email($con, $name, $email) != null) {
       throw new Exception("A user with this name or email already exists");
     }
     $req = new InsertUserRequest($email, $name, $password, $telephone, "", 0.0);
-    $this->repo->insert_user($con, $req);
+    return $this->repo->insert_user($con, $req);
   }
 
   public function login(
@@ -43,8 +43,29 @@ class DbController
     $this->session[USER_ID] = $user->id;
   }
 
-  public function get_logged_in_user_context(mysqli $con)
+  public function with_user_ctx(mysqli $con, array &$session, string $role, Closure $fn): Closure
   {
+    if (!array_key_exists(USER_ID, $session) && $role === '_') {
+      return null;
+    } else if (!array_key_exists(USER_ID, $session)) {
+      throw new Error("Permission denied");
+    } else {
+      $user_id = $session[USER_ID];
+      $user_ctx = $this->repo->select_user_by_id($con, $user_id);
+      if ($user_ctx->role !== $role && $role !== '*') {
+        throw new Error("Permission Denied");
+      } else {
+        return function () use ($fn, $user_ctx) {
+          $fn($user_ctx);
+        };
+      }
+    }
+  }
+
+  public function get_logged_in_user(mysqli $con): ?UserContext
+  {
+    if (!array_key_exists(USER_ID, $this->session))
+      return null;
     $user_id = $this->session[USER_ID];
     return $this->repo->select_user_by_id($con, $user_id);
   }
@@ -53,16 +74,16 @@ class DbController
     mysqli $con,
     UserContext $ctx,
     InsertUserRequest $req
-  ) {
-    $this->repo->update_user_by_id($con, $ctx->id, $req);
+  ): bool {
+    return $this->repo->update_user_by_id($con, $ctx->id, $req);
   }
 
   public function update_passenger(
     mysqli $con,
     UserContext $ctx,
     string $passport_image_url
-  ) {
-    $this->repo->update_passenger_by_user_id($con, $ctx->id, $passport_image_url);
+  ): bool {
+    return $this->repo->update_passenger_by_user_id($con, $ctx->id, $passport_image_url);
   }
 
   public function update_company(
@@ -70,7 +91,93 @@ class DbController
     UserContext $ctx,
     string $bio,
     string $address
+  ): bool {
+    return $this->repo->update_company_by_user_id($con, $ctx->id, $bio, $address);
+  }
+
+  public function get_completed_flights(
+    mysqli $con,
+    UserContext $ctx,
+  ): array {
+    return $this->repo->select_completed_flights_summaries_for_passenger($con, $ctx->id);
+  }
+
+  public function get_upcoming_flights(
+    mysqli $con,
+    UserContext $ctx,
+  ): array {
+    return $this->repo->select_upcoming_flights_summaries_for_passenger($con, $ctx->id);
+  }
+
+  public function get_available_flights(
+    mysqli $con,
+    UserContext $ctx,
+  ): array {
+    return $this->repo->select_available_flights_summaries_for_passenger($con, $ctx->id);
+  }
+
+  public function get_flight_details(
+    mysqli $con,
+    string $flight_id
+  ): FlightDetail {
+    $res = $this->repo->select_flight_details_by_flight_id($con, $flight_id);
+    if (!$res)
+      throw new Error("A flight with this id does not exist");
+    return $res;
+  }
+
+  public function get_flights_by_source_and_destination(
+    mysqli $con,
+    UserContext $ctx,
+    string $src,
+    string $dest
   ) {
-    $this->repo->update_company_by_user_id($con, $ctx->id, $bio, $address);
+    return $this->repo->select_available_flights_summaries_for_passenger_by_src_dest($con, $ctx->id, $src, $dest);
+  }
+
+  public function book_flight(
+    mysqli $con,
+    UserContext $ctx,
+    bool $cash,
+    string $flight_id
+  ): bool {
+    $flight = $this->repo->select_flight_details_by_flight_id($con, $flight_id);
+    if (!$flight)
+      throw new Error("A flight with this id does not exist");
+    if (new DateTime() > $flight->cities[0]->date_in_city)
+      throw new Error("Can't book a flight that starts in the past");
+    if ($this->repo->select_flight_reservation_id_by_user_id_and_flight_id($con, $ctx->id, $flight_id) != null)
+      throw new Error("You already have a reservation for this flight");
+    if ($flight->max_passengers <= $flight->registered_passengers)
+      throw new Error("This flight is fully reserved");
+    if ($cash && $ctx->money < $flight->price)
+      throw new Error("You don't have enough money to book this flight");
+    return $this->repo->insert_flight_reservation_for_user($con, $ctx->id, $flight_id)
+      && $this->repo->change_money_for_user($con, $ctx->id, -$flight->price);
+  }
+
+  public function get_flight_reservation_id_for_flight(
+    mysqli $con,
+    UserContext $ctx,
+    string $flight_id
+  ) {
+    return $this->repo->select_flight_reservation_id_by_user_id_and_flight_id($con, $ctx->id, $flight_id);
+  }
+
+  public function cancel_reservation(
+    mysqli $con,
+    UserContext $ctx,
+    string $flight_reservation_id
+  ): bool {
+    $flight_detail = $this->repo->select_flight_details_by_reservation_id($con, $flight_reservation_id);
+    if (!$flight_detail) {
+      throw new Error("Such flight reservation does not exist");
+    }
+    if ($flight_detail->cities[0]->date_in_city < new DateTime())
+      throw new Error("Can't cancel a past flight reservation");
+    if (!$this->repo->delete_flight_reservation_for_user($con, $ctx->id, $flight_reservation_id)) {
+      throw new Error("Couldn't cancel this reservation");
+    }
+    return $this->repo->change_money_for_user($con, $ctx->id, $flight_detail->price);
   }
 }

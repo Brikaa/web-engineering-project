@@ -6,14 +6,18 @@ const PASSENGER_ROLE = 'passenger';
 const COMPANY_ROLE = 'company';
 const NONE_ROLE = 'none';
 
-final class InsertUserRequest
+class BareUser
 {
   public string $email;
   public string $name;
-  public string $password;
   public string $telephone;
   public string $photo_url;
   public float $money;
+}
+
+final class InsertUserRequest extends BareUser
+{
+  public string $password;
 
   public function __construct(
     string $email,
@@ -32,17 +36,27 @@ final class InsertUserRequest
   }
 }
 
-final class UserContext
+final class UserContext extends BareUser
 {
   public string $id;
-  public string $name;
   public string $role;
 
-  public function __construct(string $id, string $name, string $role)
-  {
+  public function __construct(
+    string $id,
+    string $email,
+    string $name,
+    string $telephone,
+    string $photo_url,
+    float $money,
+    string $role,
+  ) {
     $this->id = $id;
+    $this->email = $email;
     $this->name = $name;
+    $this->telephone = $telephone;
+    $this->photo_url = $photo_url;
     $this->role = $role;
+    $this->money = $money;
   }
 }
 
