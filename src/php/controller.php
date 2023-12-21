@@ -71,7 +71,7 @@ class DbController
         throw new Error("Permission Denied");
       } else {
         return function () use ($fn, $user_ctx) {
-          $fn($user_ctx);
+          return $fn($user_ctx);
         };
       }
     }

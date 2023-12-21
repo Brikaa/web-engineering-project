@@ -1,7 +1,7 @@
 <?php
 require_once 'template.php';
 require_once 'landing_template.php';
-require_once '../model.php';
+require_once __DIR__ . '/../model.php';
 
 $home_view = function (mysqli $con, DbController $c) use (&$with_landing_template, $with_template) {
   $user = $c->get_logged_in_user($con);
@@ -10,7 +10,7 @@ $home_view = function (mysqli $con, DbController $c) use (&$with_landing_templat
     $with_template(
       <<<HTML
       <div class="header">
-        <h1>Let's finish your profile</h1>
+        <h1>Let's finish your profile ✨</h1>
       </div>
       <div class="hero">
         <h1>I'm a</h1>
@@ -42,7 +42,7 @@ $home_view = function (mysqli $con, DbController $c) use (&$with_landing_templat
       <h1>Fly anywhere, anytime</h1>
       <div class="buttons">
         <a href="?action=login" class="button primary">Login</a>
-        <a href="?action=register" class="button secondary">Register</a>
+        <a href="?action=signup" class="button secondary">Sign up</a>
       </div>
     </div>
     HTML);

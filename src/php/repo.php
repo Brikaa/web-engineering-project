@@ -72,8 +72,8 @@ class Repo
         Passenger.id,
         Company.id
       FROM User
-      LEFT JOIN Company ON Company.user_id = User.user_id
-      LEFT JOIN Passenger ON Passenger.user_id = User.user_id
+      LEFT JOIN Company ON Company.user_id = User.id
+      LEFT JOIN Passenger ON Passenger.user_id = User.id
       WHERE $condition",
       $binding,
       $params

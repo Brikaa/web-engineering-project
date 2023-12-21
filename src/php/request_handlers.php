@@ -3,12 +3,25 @@
 declare(strict_types=1);
 require_once "controller.php";
 
-$handle_login = function (mysqli $con, DbController $c) {
+class HandlerResponse {
+  public string $success_message;
+  public string $next_action;
+
+  public function __construct(string $success_message, string $next_action)
+  {
+    $this->success_message = $success_message;
+    $this->next_action = $next_action;
+  }
+}
+
+$handle_login = function (mysqli $con, DbController $c): HandlerResponse {
   $c->login($con, $_POST["email"], $_POST["password"]);
+  return new HandlerResponse("Logging you in", "");
 };
 
-$handle_signup = function (mysqli $con, DbController $c) {
+$handle_signup = function (mysqli $con, DbController $c): HandlerResponse {
   $c->signup($con, $_POST["email"], $_POST["name"], $_POST["password"], $_POST["telephone"]);
+  return new HandlerResponse("Account created successfully, you can now log in 🥳", "");
 };
 
 function update_user(mysqli $con, DbController $c, UserContext $ctx)
