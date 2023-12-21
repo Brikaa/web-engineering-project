@@ -12,6 +12,7 @@ services:
       - wep-db
   wep-db:
     container_name: wep-db
+    hostname: wep-db
     build: ./db
     environment:
       - MYSQL_ROOT_PASSWORD=root123

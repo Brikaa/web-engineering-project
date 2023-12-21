@@ -29,9 +29,17 @@ $handle_update_passenger = function (mysqli $con, DbController $c, UserContext $
   $c->update_passenger($con, $ctx, $_FILES["passport_image"]["tmp_name"]);
 };
 
+$handle_register_passenger = function (mysqli $con, DbController $c, UserContext $ctx) {
+  $c->register_passenger($con, $ctx, $_FILES["passport_image"]["tmp_name"]);
+};
+
 $handle_update_company = function (mysqli $con, DbController $c, UserContext $ctx) {
   update_user($con, $c, $ctx);
   $c->update_company($con, $ctx, $_POST["bio"], $_POST["address"]);
+};
+
+$handle_register_company = function (mysqli $con, DbController $c, UserContext $ctx) {
+  $c->register_company($con, $ctx, $_POST["bio"], $_POST["address"]);
 };
 
 $handle_book_flight = function (mysqli $con, DbController $c, UserContext $ctx) {

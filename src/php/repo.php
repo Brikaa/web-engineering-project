@@ -150,7 +150,6 @@ class Repo
 
   public function insert_passenger_for_user_id(
     mysqli $con,
-
     string $user_id,
     string $passport_image_url
   ): bool {

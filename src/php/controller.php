@@ -23,7 +23,11 @@ class DbController
     if (!getimagesize($temp_file_path)) {
       throw new Error("File is not an image");
     }
-    $path = "cnd/$user_id";
+    $image_extension = strtolower(pathinfo($temp_file_path, PATHINFO_EXTENSION));
+    if ($image_extension != "jpg" && $image_extension != "png" && $image_extension != "jpeg") {
+      throw new Error("Only JPG, PNG and JPEG are allowed");
+    }
+    $path = "cdn/$user_id";
     if (!move_uploaded_file($temp_file_path, $path))
       throw new Error("Failed to upload the file");
     return $path;
@@ -102,6 +106,27 @@ class DbController
         $ctx->money
       )
     );
+  }
+
+  public function register_passenger(
+    mysqli $con,
+    UserContext $ctx,
+    string $temp_passport_image_url
+  ) {
+    return $this->repo->insert_passenger_for_user_id(
+      $con,
+      $ctx->id,
+      $this->upload_image($temp_passport_image_url, $ctx->id)
+    );
+  }
+
+  public function register_company(
+    mysqli $con,
+    UserContext $ctx,
+    string $bio,
+    string $address
+  ): bool {
+    return $this->repo->insert_company_for_user_id($con, $ctx->id, $bio, $address);
   }
 
   public function update_passenger(

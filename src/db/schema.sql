@@ -31,7 +31,7 @@ CREATE TABLE Flight (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
   `company_user_id` varchar(36) NOT NULL,
   `name` varchar(1024) NOT NULL,
-  `max_passengers` UNSIGNED INT NOT NULL,
+  `max_passengers` INT NOT NULL,
   `price` FLOAT NOT NULL,
   CONSTRAINT CHECK_POSITIVE_MAX_PASSENGERS CHECK ((`max_passengers` > 0)),
   CONSTRAINT CHECK_POSITIVE_PRICE CHECK ((`price` >= 0)),
@@ -58,11 +58,11 @@ CREATE TABLE FlightCity (
   CONSTRAINT FK_FLIGHT_CITY FOREIGN KEY (flight_id) REFERENCES Flight(id) ON DELETE CASCADE
 );
 
-CREATE TABLE Message {
+CREATE TABLE Message (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
   `message` TEXT NOT NULL,
   `sender_user_id` varchar(36) NOT NULL,
   `receiver_user_id` varchar(36) NOT NULL,
   CONSTRAINT FK_MESSAGE_SENDER FOREIGN KEY (sender_user_id) REFERENCES User(id) ON DELETE CASCADE,
-  CONSTRAINT FK_MESSAGE_RECEIVER FOREIGN KEY (receiver_user_id) REFERENCES User(id) ON DELETE CASCADE,
-}
+  CONSTRAINT FK_MESSAGE_RECEIVER FOREIGN KEY (receiver_user_id) REFERENCES User(id) ON DELETE CASCADE
+);
