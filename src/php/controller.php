@@ -113,6 +113,8 @@ class DbController
     UserContext $ctx,
     string $temp_passport_image_url
   ) {
+    if ($ctx->role != NONE_ROLE)
+      throw new Error("You have already specified your account type");
     return $this->repo->insert_passenger_for_user_id(
       $con,
       $ctx->id,
@@ -126,6 +128,8 @@ class DbController
     string $bio,
     string $address
   ): bool {
+    if ($ctx->role != NONE_ROLE)
+      throw new Error("You have already specified your account type");
     return $this->repo->insert_company_for_user_id($con, $ctx->id, $bio, $address);
   }
 

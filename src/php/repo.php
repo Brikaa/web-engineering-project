@@ -80,9 +80,9 @@ class Repo
     );
     if ($user) {
       $role = NONE_ROLE;
-      if ($user[2] == null && $user[3] == null) {
+      if ($user[6] == null && $user[7] == null) {
         $role = NONE_ROLE;
-      } else if ($user[2] != null) {
+      } else if ($user[6] != null) {
         $role = PASSENGER_ROLE;
       } else {
         $role = COMPANY_ROLE;

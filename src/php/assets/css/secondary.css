@@ -1,13 +1,64 @@
 body {
   text-align: center;
+  background: url('/assets/images/airport-image.jpg');
+  background-size: cover;
+  color: var(--white);
 }
 
 .header {
   background-color: rgba(177, 143, 105, 0.85);
-  padding: 0.2rem;
-  border-bottom-left-radius: 26px;
-  border-bottom-right-radius: 26px;
+  padding: 1rem;
   color: white;
   box-shadow: 0 2px 1px 1px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
+}
+
+h1 {
+  margin: 0;
+}
+
+.hero {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  backdrop-filter: blur(3px);
+  transition: all 0.1s;
+}
+
+.hero > form {
+  align-items: center;
+}
+
+.hero > form.hidden {
+  display: none;
+}
+
+h2 {
+  display: inline-block;
+}
+
+.choices > h2 {
+  border: 2px solid var(--white);
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  transition: all var(--fast-transition);
+}
+
+.choices:hover {
+  cursor: pointer;
+}
+
+.choices > h2:nth-child(1) {
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.choices > h2:nth-child(2) {
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.choices > h2.selected {
+  background: var(--primary-button-color);
 }

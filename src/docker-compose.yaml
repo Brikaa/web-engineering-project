@@ -10,6 +10,8 @@ services:
       - '9000:9000'
     depends_on:
       - wep-db
+    volumes:
+      - ./php:/app
   wep-db:
     container_name: wep-db
     hostname: wep-db

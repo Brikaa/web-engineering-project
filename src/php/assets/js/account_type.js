@@ -9,9 +9,11 @@
     [passenger_choice, passenger_form, company_choice, company_form],
     [company_choice, company_form, passenger_choice, passenger_form]
   ].forEach(([choice, form, opposite_choice, opposite_form]) => {
-    choice.classList.add('selected');
-    form.classList.remove('hidden');
-    opposite_choice.classList.remove('selected');
-    opposite_form.classList.add('hidden');
+    choice.addEventListener('click', () => {
+      choice.classList.add('selected');
+      form.classList.remove('hidden');
+      opposite_choice.classList.remove('selected');
+      opposite_form.classList.add('hidden');
+    });
   });
 })();
