@@ -362,6 +362,7 @@ class Repo
         Flight.id,
         Flight.name,
         Flight.price,
+        Company.user_id,
         Company.name,
         Flight.max_passengers,
         COUNT(FlightReservation.id),
@@ -382,7 +383,7 @@ class Repo
     } else {
       $cities = array();
       foreach ($flights_with_cities as $row) {
-        $cities[] = new FlightCity($row[6], new DateTime($row[7]));
+        $cities[] = new FlightCity($row[7], new DateTime($row[8]));
       }
       return new FlightDetail(
         $flights_with_cities[0][0],
@@ -391,6 +392,7 @@ class Repo
         $flights_with_cities[0][3],
         $flights_with_cities[0][4],
         $flights_with_cities[0][5],
+        $flights_with_cities[0][6],
         $cities,
       );
     }
@@ -399,6 +401,19 @@ class Repo
   public function select_flight_details_by_flight_id(mysqli $con, string $flight_id): ?FlightDetail
   {
     return $this->select_flight_details_by_condition($con, "Flight.id = ?", "s", [$flight_id]);
+  }
+
+  public function select_flight_details_by_flight_id_and_company_user_id(
+    mysqli $con,
+    string $flight_id,
+    string $user_id
+  ): ?FlightDetail {
+    return $this->select_flight_details_by_condition(
+      $con,
+      "Flight.id = ? AND Company.user_id = ?",
+      "ss",
+      [$flight_id, $user_id]
+    );
   }
 
   public function select_flight_details_by_reservation_id(mysqli $con, string $reservation_id): ?FlightDetail
@@ -447,7 +462,7 @@ class Repo
     return $this->change_money_by_condition($con, "User.id = ?", "s", [$user_id], $delta);
   }
 
-  public function change_money_for_registered_passenger(mysqli $con, string $flight_id, float $delta)
+  public function change_money_for_registered_passengers(mysqli $con, string $flight_id, float $delta)
   {
     return $this->change_money_by_condition(
       $con,
@@ -485,15 +500,30 @@ class Repo
     );
   }
 
+  public function insert_flight_city_for_flight(
+    mysqli $con,
+    string $flight_id,
+    string $city_name,
+    DateTime $date_in_city
+  ) {
+    return $this->execute_statement(
+      $con,
+      "INSERT INTO FlightCity (flight_id, `name`, date_in_city) VALUES (?, ?, ?)",
+      "sss",
+      [$flight_id, $city_name, $date_in_city]
+    );
+  }
+
   public function delete_flight(
     mysqli $con,
+    string $user_id,
     string $flight_id
   ) {
     return $this->execute_statement(
       $con,
-      "DELETE FROM Flight WHERE Flight.id = ?",
-      "s",
-      [$flight_id]
+      "DELETE FROM Flight WHERE Flight.id = ? AND Flight.company_user_id = ?",
+      "ss",
+      [$flight_id, $user_id]
     );
   }
 

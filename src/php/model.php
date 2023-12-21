@@ -125,6 +125,7 @@ final class FlightSummary extends BareFlight
 final class FlightDetail extends BareFlight
 {
   public array $cities;
+  public string $company_user_id;
   public int $max_passengers;
   public int $registered_passengers;
 
@@ -132,6 +133,7 @@ final class FlightDetail extends BareFlight
     string $id,
     string $name,
     float $price,
+    string $company_user_id,
     string $company_name,
     int $max_passengers,
     int $registered_passengers,
@@ -144,6 +146,7 @@ final class FlightDetail extends BareFlight
     $this->cities = $cities;
     $this->max_passengers = $max_passengers;
     $this->registered_passengers = $registered_passengers;
+    $this->company_user_id = $company_user_id;
   }
 }
 

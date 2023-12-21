@@ -180,4 +180,58 @@ class DbController
     }
     return $this->repo->change_money_for_user($con, $ctx->id, $flight_detail->price);
   }
+
+  public function send_message(
+    mysqli $con,
+    UserContext $ctx,
+    string $receiver_id,
+    string $message
+  ): bool {
+    return $this->repo->insert_message($con, $ctx->id, $receiver_id, $message);
+  }
+
+  public function get_received_messages(mysqli $con, UserContext $ctx): array
+  {
+    return $this->repo->select_received_messages_for_user($con, $ctx->id);
+  }
+
+  public function get_sent_messages(mysqli $con, UserContext $ctx): array
+  {
+    return $this->repo->select_sent_messages_for_user($con, $ctx->id);
+  }
+
+  public function list_company_flights(mysqli $con, UserContext $ctx): array
+  {
+    return $this->repo->select_flights_summaries_for_company($con, $ctx->id);
+  }
+
+  public function add_flight(mysqli $con, UserContext $ctx, string $name, int $max_passengers, float $price): bool
+  {
+    return $this->repo->insert_flight_for_company($con, $ctx->id, $name, $max_passengers, $price);
+  }
+
+  public function add_flight_city(
+    mysqli $con,
+    UserContext $ctx,
+    string $flight_id,
+    string $city_name,
+    DateTime $date_in_city
+  ): bool {
+    if (!$this->repo->select_flight_details_by_flight_id_and_company_user_id($con, $flight_id, $ctx->id))
+      throw new Error("You do not own such a flight");
+    return $this->repo->insert_flight_city_for_flight($con, $flight_id, $city_name, $date_in_city);
+  }
+
+  public function cancel_flight(
+    mysqli $con,
+    UserContext $ctx,
+    string $flight_id,
+  ): bool {
+    $flight = $this->repo->select_flight_details_by_flight_id($con, $flight_id);
+    if ($flight->company_user_id != $ctx->id)
+      throw new Error("You do not own this flight");
+    if (!$this->repo->delete_flight($con, $ctx->id, $flight_id))
+      throw new Error("Can't cancel this flight");
+    return $this->repo->change_money_for_registered_passengers($con, $flight_id, $flight->price);
+  }
 }

@@ -92,6 +92,7 @@
 - Company
   - List own flights
   - Add flight
+  - Add flight city
   - Cancel flight
   - View received messages
   - View sent messages
