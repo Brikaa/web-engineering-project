@@ -3,7 +3,8 @@
 declare(strict_types=1);
 require_once "controller.php";
 
-class HandlerResponse {
+class HandlerResponse
+{
   public string $success_message;
   public string $next_action;
 

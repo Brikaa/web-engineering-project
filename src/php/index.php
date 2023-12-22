@@ -27,8 +27,9 @@ function handle_action($action, $router, $success_view, $error_view, $not_found_
         $router[$action]();
       }
     }
-  } catch (Exception $e) {
+  } catch (Error $e) {
     $error_view($e->getMessage());
+    error_log($e->getTraceAsString());
   }
 };
 
@@ -41,7 +42,7 @@ function with_db(Closure $fn)
       $res = $fn($con);
       $con->commit();
       return $res;
-    } catch (Exception $e) {
+    } catch (Error $e) {
       $con->rollback();
       throw $e;
     } finally {
@@ -68,6 +69,26 @@ $router = array(
   }),
   "handle_signup" => with_db(function (mysqli $con) use ($controller, $handle_signup) {
     return $handle_signup($con, $controller);
+  }),
+  "handle_register_passenger" => with_db(function (mysqli $con) use ($controller, $handle_register_passenger) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      NONE_ROLE,
+      function ($ctx) use ($con, $controller, $handle_register_passenger) {
+        return $handle_register_passenger($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "handle_register_company" => with_db(function (mysqli $con) use ($controller, $handle_register_company) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      NONE_ROLE,
+      function ($ctx) use ($con, $controller, $handle_register_company) {
+        return $handle_register_company($con, $controller, $ctx);
+      }
+    )();
   }),
 );
 handle_action($action, $router, $success_view, $error_view, $not_found_view);

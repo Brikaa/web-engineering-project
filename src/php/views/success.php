@@ -1,9 +1,8 @@
-<?
-require_once 'template.php';
+<?php
+require_once 'secondary_template.php';
 
-$success_view = function (string $message, string $next_action) use ($with_template) {
-  $with_template(<<<HTML
-  <p>$message</p>
+$success_view = function (string $message, string $next_action) use ($with_secondary_template) {
+  $with_secondary_template($message, <<<HTML
   <meta http-equiv="refresh" content="2; url='/?action=$next_action'" />
   HTML);
 };

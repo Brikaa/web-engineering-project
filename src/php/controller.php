@@ -6,6 +6,8 @@ require_once "model.php";
 require_once "repo.php";
 
 const USER_ID = "user_id";
+const PASSPORT_IMAGE = "passport";
+const PROFILE_IMAGE = "profile";
 
 class DbController
 {
@@ -18,16 +20,12 @@ class DbController
     $this->session = &$session;
   }
 
-  private function upload_image(string $temp_file_path, string $user_id): string
+  private function upload_image(string $temp_file_path, string $type, string $user_id): string
   {
     if (!getimagesize($temp_file_path)) {
       throw new Error("File is not an image");
     }
-    $image_extension = strtolower(pathinfo($temp_file_path, PATHINFO_EXTENSION));
-    if ($image_extension != "jpg" && $image_extension != "png" && $image_extension != "jpeg") {
-      throw new Error("Only JPG, PNG and JPEG are allowed");
-    }
-    $path = "cdn/$user_id";
+    $path = "cdn/$user_id-$type";
     if (!move_uploaded_file($temp_file_path, $path))
       throw new Error("Failed to upload the file");
     return $path;
@@ -102,7 +100,7 @@ class DbController
         $name,
         $password,
         $telephone,
-        $this->upload_image($temp_photo_url, $ctx->id),
+        $this->upload_image($temp_photo_url, PROFILE_IMAGE, $ctx->id),
         $ctx->money
       )
     );
@@ -113,12 +111,10 @@ class DbController
     UserContext $ctx,
     string $temp_passport_image_url
   ) {
-    if ($ctx->role != NONE_ROLE)
-      throw new Error("You have already specified your account type");
     return $this->repo->insert_passenger_for_user_id(
       $con,
       $ctx->id,
-      $this->upload_image($temp_passport_image_url, $ctx->id)
+      $this->upload_image($temp_passport_image_url, PASSPORT_IMAGE, $ctx->id)
     );
   }
 
@@ -141,7 +137,7 @@ class DbController
     return $this->repo->update_passenger_by_user_id(
       $con,
       $ctx->id,
-      $this->upload_image($temp_passport_image_url, $ctx->id)
+      $this->upload_image($temp_passport_image_url, PASSPORT_IMAGE, $ctx->id)
     );
   }
 
