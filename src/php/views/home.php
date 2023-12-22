@@ -13,10 +13,12 @@ $generate_flight_cards_from_flights = function (array $flights) {
     $source = $flight->source->name;
     $destination = $flight->destination->name;
     $res .= <<<HTML
-    <div class="flight-card">
-      <h2>$source to $destination</h2>
-      <p>$date - $flight->company_name - $flight->price$</p>
-    </div>
+    <a href="?action=flight&id=$flight->id">
+      <div class="flight-card">
+        <h2>$source to $destination</h2>
+        <p>$date - $flight->company_name - $flight->price$</p>
+      </div>
+    </a>
     HTML;
   }
   if ($res == "") {
@@ -31,14 +33,13 @@ $home_view = function (
 ) use ($with_landing_template, $with_main_template, $with_secondary_template, $generate_flight_cards_from_flights) {
   $user = $c->get_logged_in_user($con);
   if ($user && $user->role != NONE_ROLE) {
+    $html = "";
     $profile_image_url = $user->photo_url === "" ? "/assets/images/avatar.png" : $user->photo_url;
     if ($user->role == PASSENGER_ROLE) {
       $upcoming_flights = $generate_flight_cards_from_flights($c->get_upcoming_flights($con, $user));
       $available_flights = $generate_flight_cards_from_flights($c->get_available_flights($con, $user));
       $completed_flights = $generate_flight_cards_from_flights($c->get_completed_flights($con, $user));
-      $with_main_template(
-        "Home",
-        <<<HTML
+      $html = <<<HTML
         <div class="section">
           <h1>Upcoming flights</h1>
           <div class="flights">$upcoming_flights</div>
@@ -46,8 +47,8 @@ $home_view = function (
         <div class="section">
           <h1>Available flights</h1>
           <form action="/" method="POST">
-            <input class="input" type="text" name="from" placeholder="From">
-            <input class="input" type="text" name="to" placeholder="To">
+            <input class="input" type="text" name="from" placeholder="From" required>
+            <input class="input" type="text" name="to" placeholder="To" required>
             <input class="button secondary" type="submit" value="Go">
           </form>
           <div class="flights">$available_flights</div>
@@ -56,23 +57,32 @@ $home_view = function (
           <h1>Completed flights</h1>
           <div class="flights">$completed_flights</div>
         </div>
-        HTML,
-        <<<HTML
-        <div class="profile-area">
-          <a class="user-info" href="/?action=profile">
-            <div class="avatar-icon" style="background-image: url('$profile_image_url')"></div>
-            <h2>$user->name</h2>
-          </a>
-          <div class="actions">
-            <a href="/?action=messages"><img src="/assets/images/envelope.svg" /></a>
-            <a href="/?action=handle_logout"><img src="/assets/images/sign-out.svg" /></a>
-          </div>
-        </div>
-        HTML
-      );
+      HTML;
     } else {
-      echo $user->role;
+      $company_flights = $generate_flight_cards_from_flights($c->list_company_flights($con, $user));
+      $html = <<<HTML
+      <div class="section">
+        <h1>Company flights</h1>
+        <div class="flights">$company_flights</div>
+      </div>
+      HTML;
     }
+    $with_main_template(
+      "Home",
+      $html,
+      <<<HTML
+      <div class="profile-area">
+        <a class="user-info" href="/?action=profile">
+          <div class="avatar-icon" style="background-image: url('$profile_image_url')"></div>
+          <h2>$user->name</h2>
+        </a>
+        <div class="actions">
+          <a href="/?action=messages"><img src="/assets/images/envelope.svg" /></a>
+          <a href="/?action=handle_logout"><img src="/assets/images/sign-out.svg" /></a>
+        </div>
+      </div>
+      HTML
+    );
   } else if ($user) {
     $with_secondary_template(
       "Let's finish your profile ✨",

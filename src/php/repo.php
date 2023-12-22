@@ -322,7 +322,7 @@ class Repo
     return $this->select_flights_summaries_by_condition(
       $con,
       "Flight",
-      "Company.user_id = ?",
+      "CompanyUser.id = ?",
       "s",
       [$user_id]
     );
@@ -360,7 +360,7 @@ class Repo
         Flight.id,
         Flight.name,
         Flight.price,
-        Company.user_id,
+        CompanyUser.id,
         CompanyUser.name,
         Flight.max_passengers,
         COUNT(FlightReservation.id),
@@ -408,7 +408,7 @@ class Repo
   ): ?FlightDetail {
     return $this->select_flight_details_by_condition(
       $con,
-      "Flight.id = ? AND Company.user_id = ?",
+      "Flight.id = ? AND CompanyUser.id = ?",
       "ss",
       [$flight_id, $user_id]
     );

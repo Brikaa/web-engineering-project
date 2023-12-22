@@ -43,10 +43,6 @@ h2 {
   transition: all var(--fast-transition);
 }
 
-.choices:hover {
-  cursor: pointer;
-}
-
 .choices > h2:nth-child(1) {
   border-right: none;
   border-top-right-radius: 0;
@@ -61,4 +57,8 @@ h2 {
 
 .choices > h2.selected {
   background: var(--primary-button-color);
+}
+
+a {
+  text-decoration: none;
 }
