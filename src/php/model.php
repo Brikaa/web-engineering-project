@@ -90,6 +90,12 @@ final class FlightCity
 {
   public string $name;
   public DateTime $date_in_city;
+
+  public function __construct(string $name, DateTime $date_in_city)
+  {
+    $this->name = $name;
+    $this->date_in_city = $date_in_city;
+  }
 }
 
 class BareFlight

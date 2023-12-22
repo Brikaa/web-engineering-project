@@ -3,7 +3,7 @@
 declare(strict_types=1);
 require_once 'template.php';
 
-$with_secondary_template = function ($header, $content, $additional_head = "") use ($with_template) {
+$with_secondary_template = function (string $header, string $content, string $additional_head = "") use ($with_template) {
   $with_template(
     <<<HTML
     <div class="header">

@@ -30,6 +30,7 @@ function handle_action($action, $router, $success_view, $error_view, $not_found_
   } catch (Throwable $e) {
     $error_view($e->getMessage());
     error_log($e->getTraceAsString());
+    error_log(strval($e->getLine()));
   }
 };
 

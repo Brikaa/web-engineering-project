@@ -34,7 +34,7 @@ body {
 }
 
 .landing-content > form > .input,
-.hero > form > .input {
+.hero form > .input {
   background-color: rgba(255, 255, 255, 0.5);
   outline: none;
   color: var(--black);
@@ -48,8 +48,8 @@ body {
 
 .landing-content > form > .input:focus,
 .landing-content > form > .input:hover,
-.hero > form > .input:focus,
-.hero > form > .input:hover {
+.hero form > .input:focus,
+.hero form > .input:hover {
   padding: 0.7rem;
 }
 

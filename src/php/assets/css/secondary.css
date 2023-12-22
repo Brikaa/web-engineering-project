@@ -6,7 +6,7 @@ body {
 }
 
 .header {
-  background-color: rgba(177, 143, 105, 0.85);
+  background-color: var(--primary-button-color);
   padding: 1rem;
   color: white;
   box-shadow: 0 2px 1px 1px rgba(0, 0, 0, 0.3);

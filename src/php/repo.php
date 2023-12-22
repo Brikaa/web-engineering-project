@@ -44,11 +44,10 @@ class Repo
   private function select_all(mysqli $con, string $sql, string $binding, array $params): array
   {
     return $this->with_executed_statement($con, $sql, $binding, $params, function (mysqli_stmt $s) {
+      $res = $s->get_result();
       $arr = array();
-      while ($res = $s->get_result()) {
-        if ($e = $res->fetch_array()) {
-          $arr[] = $e;
-        }
+      while ($e = $res->fetch_array()) {
+        $arr[] = $e;
       }
       return $arr;
     });
@@ -104,7 +103,7 @@ class Repo
       "SELECT
         Flight.id,
         Flight.name,
-        Company.name,
+        CompanyUser.name,
         Flight.price,
         StartCity.name,
         StartCity.date_in_city,
@@ -112,12 +111,12 @@ class Repo
         EndCity.date_in_city
       FROM $from
         LEFT JOIN
-          (SELECT C.name, C.date_in_city FROM FlightCity AS C ORDER BY C.date_in_city ASC LIMIT 1)
+          (SELECT C.name, C.date_in_city, C.flight_id FROM FlightCity AS C ORDER BY C.date_in_city ASC LIMIT 1)
         AS StartCity ON StartCity.flight_id = Flight.id
         LEFT JOIN
-          (SELECT C.name, C.date_in_city FROM FlightCity AS C ORDER BY C.date_in_city DESC LIMIT 1)
+          (SELECT C.name, C.date_in_city, C.flight_id FROM FlightCity AS C ORDER BY C.date_in_city DESC LIMIT 1)
         AS EndCity ON EndCity.flight_id = Flight.id
-        LEFT JOIN Company ON Company.user_id = Flight.company_user_id
+        LEFT JOIN User AS CompanyUser ON Flight.company_user_id = CompanyUser.id
       WHERE $condition",
       $bindings,
       $params
@@ -362,13 +361,13 @@ class Repo
         Flight.name,
         Flight.price,
         Company.user_id,
-        Company.name,
+        CompanyUser.name,
         Flight.max_passengers,
         COUNT(FlightReservation.id),
         City.name,
         City.date_in_city
       FROM Flight
-      LEFT JOIN Company ON Flight.company_user_id = Company.user_id
+      LEFT JOIN User AS CompanyUser ON Flight.company_user_id = CompanyUser.id
       LEFT JOIN FlightCity ON FlightCity.flight_id = Flight.id
       LEFT JOIN FlightReservation ON FlightReservation.flight_id = Flight.id
       WHERE $condition
