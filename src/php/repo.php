@@ -169,7 +169,7 @@ class Repo
   ): bool {
     return $this->execute_statement(
       $con,
-      "INSERT INTO Passenger(`user_id`, `bio`, `address`) values(?, ?, ?)",
+      "INSERT INTO Company(`user_id`, `bio`, `address`) values(?, ?, ?)",
       "sss",
       [$user_id, $bio, $address]
     );

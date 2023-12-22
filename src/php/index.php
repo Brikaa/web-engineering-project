@@ -27,7 +27,7 @@ function handle_action($action, $router, $success_view, $error_view, $not_found_
         $router[$action]();
       }
     }
-  } catch (Error $e) {
+  } catch (Throwable $e) {
     $error_view($e->getMessage());
     error_log($e->getTraceAsString());
   }
@@ -42,7 +42,7 @@ function with_db(Closure $fn)
       $res = $fn($con);
       $con->commit();
       return $res;
-    } catch (Error $e) {
+    } catch (Throwable $e) {
       $con->rollback();
       throw $e;
     } finally {
