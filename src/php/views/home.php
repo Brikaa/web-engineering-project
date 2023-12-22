@@ -63,8 +63,9 @@ $home_view = function (
             <div class="avatar-icon" style="background-image: url('$profile_image_url')"></div>
             <h2>$user->name</h2>
           </a>
-          <div>
+          <div class="actions">
             <a href="/?action=messages"><img src="/assets/images/envelope.svg" /></a>
+            <a href="/?action=handle_logout"><img src="/assets/images/sign-out.svg" /></a>
           </div>
         </div>
         HTML

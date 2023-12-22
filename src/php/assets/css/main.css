@@ -66,10 +66,20 @@ a {
   color: var(--white);
 }
 
-.user-info {
+.user-info, .actions > a {
   transition: all var(--fast-transition);
 }
 
-.user-info:hover {
+.user-info:hover, .actions > a:hover {
   opacity: 0.8;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.actions > a > img {
+  height: 20px;
 }

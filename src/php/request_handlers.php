@@ -20,6 +20,11 @@ $handle_login = function (mysqli $con, DbController $c): HandlerResponse {
   return new HandlerResponse("Logging you in", "");
 };
 
+$handle_logout = function (DbController $c): HandlerResponse {
+  $c->logout();
+  return new HandlerResponse("Logging you out", "");
+};
+
 $handle_signup = function (mysqli $con, DbController $c): HandlerResponse {
   $c->signup($con, $_POST["email"], $_POST["name"], $_POST["password"], $_POST["telephone"]);
   return new HandlerResponse("Account created successfully, you can now log in 🥳", "");

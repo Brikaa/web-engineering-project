@@ -56,6 +56,10 @@ class DbController
     $this->session[USER_ID] = $user->id;
   }
 
+  public function logout() {
+    $this->session = array();
+  }
+
   public function with_user_ctx(mysqli $con, array &$session, string $role, Closure $fn): Closure
   {
     if (!array_key_exists(USER_ID, $session) && $role === '_') {

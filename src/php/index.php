@@ -65,6 +65,9 @@ $router = array(
   }),
   "login" => $login_view,
   "signup" => $signup_view,
+  "handle_logout" => function () use ($controller, $handle_logout) {
+    return $handle_logout($controller);
+  },
   "handle_login" => with_db(function (mysqli $con) use ($controller, $handle_login) {
     return $handle_login($con, $controller);
   }),
