@@ -94,3 +94,8 @@ $handle_add_flight_city = function (mysqli $con, DbController $c, UserContext $c
 $handle_cancel_flight = function (mysqli $con, DbController $c, UserContext $ctx) {
   $c->cancel_flight($con, $ctx, $_POST["id"]);
 };
+
+$handle_deposit = function (mysqli $con, DbController $c, UserContext $ctx) {
+  $c->deposit_money($con, $ctx, floatval($_POST["amount"]));
+  return new HandlerResponse("Depositing money", "");
+};

@@ -88,9 +88,11 @@ $home_view = function (
           <h2>$user->name</h2>
           <h3>$user->money$</h3>
         </a>
+        <hr>
         <div class="actions">
-          <a href="/?action=messages"><img src="/assets/images/envelope.svg" /></a>
-          <a href="/?action=handle_logout"><img src="/assets/images/sign-out.svg" /></a>
+          <a href="/?action=deposit" title="Deposit money"><img src="/assets/images/money.svg" /></a>
+          <a href="/?action=messages" title="Messages"><img src="/assets/images/envelope.svg" /></a>
+          <a href="/?action=handle_logout" title="Log out"><img src="/assets/images/sign-out.svg" /></a>
         </div>
       </div>
       HTML

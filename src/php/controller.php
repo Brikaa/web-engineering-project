@@ -344,4 +344,11 @@ class DbController
         -$flight->price * $flight->registered_passengers
       );
   }
+
+  public function deposit_money(mysqli $con, UserContext $ctx, float $amount): bool
+  {
+    if ($amount <= 0)
+      throw new Error("Invalid amount to deposit");
+    return $this->repo->change_money_for_user($con, $ctx->id, $amount);
+  }
 }

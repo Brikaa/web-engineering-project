@@ -60,11 +60,13 @@ p {
   align-items: center;
 }
 
-.user-info, .actions > a {
+.user-info,
+.actions > a {
   transition: all var(--fast-transition);
 }
 
-.user-info:hover, .actions > a:hover {
+.user-info:hover,
+.actions > a:hover {
   opacity: 0.8;
 }
 
@@ -76,4 +78,15 @@ p {
 
 .actions > a > img {
   height: 20px;
+}
+
+.profile-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-area > hr {
+  color: white;
+  margin: 0;
 }

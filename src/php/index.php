@@ -12,6 +12,7 @@ require_once 'views/login.php';
 require_once 'views/signup.php';
 require_once 'views/success.php';
 require_once 'views/profile.php';
+require_once 'views/deposit.php';
 
 const ACTION = "action";
 
@@ -122,6 +123,26 @@ $router = array(
       COMPANY_ROLE,
       function ($ctx) use ($con, $controller, $handle_update_company) {
         return $handle_update_company($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "deposit" => with_db(function (mysqli $con) use ($controller, $deposit_view) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      "*",
+      function ($ctx) use ($con, $controller, $deposit_view) {
+        return $deposit_view($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "handle_deposit" => with_db(function (mysqli $con) use ($controller, $handle_deposit) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      "*",
+      function ($ctx) use ($con, $controller, $handle_deposit) {
+        return $handle_deposit($con, $controller, $ctx);
       }
     )();
   }),
