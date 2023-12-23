@@ -13,6 +13,7 @@ require_once 'views/signup.php';
 require_once 'views/success.php';
 require_once 'views/profile.php';
 require_once 'views/deposit.php';
+require_once 'views/flight.php';
 
 const ACTION = "action";
 
@@ -32,6 +33,7 @@ function handle_action($action, $router, $success_view, $error_view, $not_found_
   } catch (Throwable $e) {
     $error_view($e->getMessage());
     error_log($e->getTraceAsString());
+    error_log(strval($e->getFile()));
     error_log(strval($e->getLine()));
   }
 };
@@ -143,6 +145,56 @@ $router = array(
       "*",
       function ($ctx) use ($con, $controller, $handle_deposit) {
         return $handle_deposit($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "flight" => with_db(function (mysqli $con) use ($controller, $flight_view) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      "*",
+      function ($ctx) use ($con, $controller, $flight_view) {
+        return $flight_view($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "handle_book_flight_cash" => with_db(function (mysqli $con) use ($controller, $handle_book_flight_cash) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      PASSENGER_ROLE,
+      function ($ctx) use ($con, $controller, $handle_book_flight_cash) {
+        return $handle_book_flight_cash($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "handle_book_flight_credit" => with_db(function (mysqli $con) use ($controller, $handle_book_flight_credit) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      PASSENGER_ROLE,
+      function ($ctx) use ($con, $controller, $handle_book_flight_credit) {
+        return $handle_book_flight_credit($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "handle_cancel_reservation" => with_db(function (mysqli $con) use ($controller, $handle_cancel_reservation) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      PASSENGER_ROLE,
+      function ($ctx) use ($con, $controller, $handle_cancel_reservation) {
+        return $handle_cancel_reservation($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "handle_cancel_flight" => with_db(function (mysqli $con) use ($controller, $handle_cancel_flight) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      COMPANY_ROLE,
+      function ($ctx) use ($con, $controller, $handle_cancel_flight) {
+        return $handle_cancel_flight($con, $controller, $ctx);
       }
     )();
   }),

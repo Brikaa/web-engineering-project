@@ -10,7 +10,7 @@ require_once __DIR__ . '/../model.php';
 $generate_flight_cards_from_flights = function (array $flights) {
   $res = "";
   foreach ($flights as $flight) {
-    $date = $flight->source->date_in_city->format("jS F Y");
+    $date = format_date($flight->source->date_in_city);
     $source = $flight->source->name;
     $destination = $flight->destination->name;
     $res .= <<<HTML

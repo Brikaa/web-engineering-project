@@ -246,11 +246,13 @@ class DbController
       throw new Error("You already have a reservation for this flight");
     if ($flight->max_passengers <= $flight->registered_passengers)
       throw new Error("This flight is fully reserved");
-    if ($cash && $ctx->money < $flight->price)
+    if (!$cash && $ctx->money < $flight->price)
       throw new Error("You don't have enough money to book this flight");
+    if (!$cash) {
+      $this->repo->change_money_for_user($con, $ctx->id, -$flight->price);
+    }
     return
       $this->repo->insert_flight_reservation_for_user($con, $ctx->id, $flight_id)
-      && $this->repo->change_money_for_user($con, $ctx->id, -$flight->price)
       && $this->repo->change_money_for_user($con, $flight->company_user_id, $flight->price);
   }
 
@@ -258,7 +260,7 @@ class DbController
     mysqli $con,
     UserContext $ctx,
     string $flight_id
-  ) {
+  ): ?string {
     return $this->repo->select_flight_reservation_id_by_user_id_and_flight_id($con, $ctx->id, $flight_id);
   }
 
@@ -332,8 +334,6 @@ class DbController
     string $flight_id,
   ): bool {
     $flight = $this->repo->select_flight_details_by_flight_id($con, $flight_id);
-    if ($flight->company_user_id != $ctx->id)
-      throw new Error("You do not own this flight");
     if (!$this->repo->delete_flight($con, $ctx->id, $flight_id))
       throw new Error("Can't cancel this flight");
     return

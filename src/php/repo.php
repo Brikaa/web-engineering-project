@@ -367,7 +367,7 @@ class Repo
   ): ?string {
     $res = $this->select_one(
       $con,
-      "SELECT FlightReservation.flight_id FROM FlightReservation
+      "SELECT FlightReservation.id FROM FlightReservation
       WHERE
         FlightReservation.passenger_user_id = ?
         AND FlightReservation.flight_id = ?",
@@ -396,15 +396,15 @@ class Repo
         CompanyUser.name,
         Flight.max_passengers,
         COUNT(FlightReservation.id),
-        City.name,
-        City.date_in_city
+        FlightCity.name,
+        FlightCity.date_in_city
       FROM Flight
       LEFT JOIN User AS CompanyUser ON Flight.company_user_id = CompanyUser.id
       LEFT JOIN FlightCity ON FlightCity.flight_id = Flight.id
       LEFT JOIN FlightReservation ON FlightReservation.flight_id = Flight.id
       WHERE $condition
-      GROUP BY City.name
-      ORDER BY City.date_in_city",
+      GROUP BY FlightCity.name, Flight.id
+      ORDER BY FlightCity.date_in_city",
       $bindings,
       $params
     );

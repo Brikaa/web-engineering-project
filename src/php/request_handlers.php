@@ -71,12 +71,22 @@ $handle_register_company = function (mysqli $con, DbController $c, UserContext $
   return new HandlerResponse("Updating your profile", "");
 };
 
-$handle_book_flight = function (mysqli $con, DbController $c, UserContext $ctx) {
-  $c->book_flight($con, $ctx, $_POST["cash"], $_POST["id"]);
+$handle_book_flight_cash = function (mysqli $con, DbController $c, UserContext $ctx) {
+  $id = $_POST["id"];
+  $c->book_flight($con, $ctx, true, $id);
+  return new HandlerResponse("Booking your flight 🎉", "");
+};
+
+$handle_book_flight_credit = function (mysqli $con, DbController $c, UserContext $ctx) {
+  $id = $_POST["id"];
+  $c->book_flight($con, $ctx, false, $id);
+  return new HandlerResponse("Booking your flight 🎉", "");
 };
 
 $handle_cancel_reservation = function (mysqli $con, DbController $c, UserContext $ctx) {
-  $c->cancel_reservation($con, $ctx, $_POST["id"]);
+  $id = $_POST["id"];
+  $c->cancel_reservation($con, $ctx, $id);
+  return new HandlerResponse("Cancelling the reservation", "");
 };
 
 $handle_send_message = function (mysqli $con, DbController $c, UserContext $ctx) {
@@ -88,11 +98,12 @@ $handle_add_flight = function (mysqli $con, DbController $c, UserContext $ctx) {
 };
 
 $handle_add_flight_city = function (mysqli $con, DbController $c, UserContext $ctx) {
-  $c->add_flight_city($con, $ctx, $_POST["flight_id"], $_POST["name"], $_POST["date_in_city"]);
+  $c->add_flight_city($con, $ctx, $_POST["flight_id"], $_POST["name"], new DateTime($_POST["date_in_city"]));
 };
 
 $handle_cancel_flight = function (mysqli $con, DbController $c, UserContext $ctx) {
   $c->cancel_flight($con, $ctx, $_POST["id"]);
+  return new HandlerResponse("Cancelling the flight", "");
 };
 
 $handle_deposit = function (mysqli $con, DbController $c, UserContext $ctx) {

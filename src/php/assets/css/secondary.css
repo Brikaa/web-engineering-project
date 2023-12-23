@@ -18,7 +18,7 @@ h1 {
 }
 
 .hero {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.4);
   padding: 1rem;
   backdrop-filter: blur(3px);
   transition: all 0.1s;
@@ -41,6 +41,7 @@ h2 {
   padding: 0.1rem 0.4rem;
   border-radius: 6px;
   transition: all var(--fast-transition);
+  cursor: pointer;
 }
 
 .choices > h2:nth-child(1) {
@@ -62,4 +63,17 @@ h2 {
 a {
   text-decoration: none;
   color: var(--white);
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.flight-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: left;
 }
