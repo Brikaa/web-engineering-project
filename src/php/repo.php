@@ -174,37 +174,70 @@ class Repo
     );
   }
 
-  public function update_user_by_id(
-    mysqli $con,
-
-    string $id,
-    InsertUserRequest $user
-  ): bool {
-    return $this->execute_statement(
-      $con,
-      "UPDATE User SET `email`=?, `name`=?, `password`=?, `telephone`=?, `photo_url`=?, `money`=? WHERE id=?",
-      "sssssds",
-      [$user->email, $user->name, $user->password, $user->telephone, $user->photo_url, $user->money, $id]
+  private function get_fields_to_update(
+    array $fields,
+    string $bindings,
+    array $params,
+    string $condition_bindings,
+    array $condition_params,
+  ): array {
+    $fields_res = array();
+    $params_res = array();
+    $bindings_res = "";
+    for ($i = 0; $i < strlen($bindings); ++$i) {
+      if ($params[$i] !== null) {
+        $fields_res[] = $fields[$i];
+        $params_res[] = $params[$i];
+        $bindings_res .= $bindings[$i];
+      }
+    }
+    return array(
+      join(", ", $fields_res),
+      $bindings_res . $condition_bindings,
+      array_merge($params_res, $condition_params)
     );
+  }
+
+  public function update_user_by_id(mysqli $con, string $id, InsertUserRequest $user): bool
+  {
+    $res = $this->get_fields_to_update(
+      ["`email`=?", "`name`=?", "`password`=?", "`telephone`=?", "`photo_url`=?", "`money`=?"],
+      "sssssd",
+      [$user->email, $user->name, $user->password, $user->telephone, $user->photo_url, $user->money],
+      "s",
+      [$id]
+    );
+    $fields = $res[0];
+    $bindings = $res[1];
+    $params = $res[2];
+    return $this->execute_statement($con, "UPDATE User SET $fields WHERE id=?", $bindings, $params);
   }
 
   public function update_passenger_by_user_id(
     mysqli $con,
-
     string $user_id,
     string $passport_image_url
   ): bool {
+    $res = $this->get_fields_to_update(
+      ["`passport_image_url`=?"],
+      "s",
+      [$passport_image_url],
+      "s",
+      [$user_id]
+    );
+    $fields = $res[0];
+    $bindings = $res[1];
+    $params = $res[2];
     return $this->execute_statement(
       $con,
-      "UPDATE Passenger SET passport_image_url=? WHERE user_id=?",
-      "ss",
-      [$passport_image_url, $user_id]
+      "UPDATE Passenger SET $fields WHERE user_id=?",
+      $bindings,
+      $params
     );
   }
 
   public function update_company_by_user_id(
     mysqli $con,
-
     string $user_id,
     string $bio,
     string $address

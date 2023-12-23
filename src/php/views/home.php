@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once 'secondary_template.php';
 require_once 'landing_template.php';
 require_once 'main_template.php';
+require_once 'util.php';
 require_once __DIR__ . '/../model.php';
 
 $generate_flight_cards_from_flights = function (array $flights) {
@@ -34,7 +35,6 @@ $home_view = function (
   $user = $c->get_logged_in_user($con);
   if ($user && $user->role != NONE_ROLE) {
     $html = "";
-    $profile_image_url = $user->photo_url === "" ? "/assets/images/avatar.png" : $user->photo_url;
     if ($user->role == PASSENGER_ROLE) {
       $upcoming_flights = $generate_flight_cards_from_flights($c->get_upcoming_flights($con, $user));
       $available_flights = $generate_flight_cards_from_flights($c->get_available_flights($con, $user));
@@ -67,6 +67,7 @@ $home_view = function (
       </div>
       HTML;
     }
+    $profile_image_url = get_profile_image_url($user);
     $with_main_template(
       "Home",
       $html,
@@ -75,6 +76,7 @@ $home_view = function (
         <a class="user-info" href="/?action=profile">
           <div class="avatar-icon" style="background-image: url('$profile_image_url')"></div>
           <h2>$user->name</h2>
+          <h3>$user->money$</h3>
         </a>
         <div class="actions">
           <a href="/?action=messages"><img src="/assets/images/envelope.svg" /></a>

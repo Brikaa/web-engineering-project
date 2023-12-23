@@ -11,6 +11,7 @@ require_once 'views/not_found.php';
 require_once 'views/login.php';
 require_once 'views/signup.php';
 require_once 'views/success.php';
+require_once 'views/profile.php';
 
 const ACTION = "action";
 
@@ -91,6 +92,36 @@ $router = array(
       NONE_ROLE,
       function ($ctx) use ($con, $controller, $handle_register_company) {
         return $handle_register_company($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "profile" => with_db(function (mysqli $con) use ($controller, $profile_view) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      '*',
+      function ($ctx) use ($con, $controller, $profile_view) {
+        return $profile_view($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "handle_update_passenger" => with_db(function (mysqli $con) use ($controller, $handle_update_passenger) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      PASSENGER_ROLE,
+      function ($ctx) use ($con, $controller, $handle_update_passenger) {
+        return $handle_update_passenger($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "handle_update_company" => with_db(function (mysqli $con) use ($controller, $handle_update_company) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      COMPANY_ROLE,
+      function ($ctx) use ($con, $controller, $handle_update_company) {
+        return $handle_update_company($con, $controller, $ctx);
       }
     )();
   }),

@@ -30,6 +30,11 @@ $handle_signup = function (mysqli $con, DbController $c): HandlerResponse {
   return new HandlerResponse("Account created successfully, you can now log in 🥳", "");
 };
 
+function get_photo_temp_name(string $attribute_name): string
+{
+  return array_key_exists($attribute_name, $_FILES) ? $_FILES[$attribute_name]["tmp_name"] : "";
+}
+
 function update_user(mysqli $con, DbController $c, UserContext $ctx)
 {
   $c->update_user(
@@ -39,13 +44,15 @@ function update_user(mysqli $con, DbController $c, UserContext $ctx)
     $_POST["name"],
     $_POST["password"],
     $_POST["telephone"],
-    $_FILES["photo"]["tmp_name"]
+    get_photo_temp_name("photo")
   );
 }
 
 $handle_update_passenger = function (mysqli $con, DbController $c, UserContext $ctx) {
   update_user($con, $c, $ctx);
-  $c->update_passenger($con, $ctx, $_FILES["passport_image"]["tmp_name"]);
+  error_log($_FILES["passport_image"]["tmp_name"]);
+  $c->update_passenger($con, $ctx, get_photo_temp_name("passport_image"));
+  return new HandlerResponse("Updating your profile ✨", "profile");
 };
 
 $handle_register_passenger = function (mysqli $con, DbController $c, UserContext $ctx) {
@@ -56,6 +63,7 @@ $handle_register_passenger = function (mysqli $con, DbController $c, UserContext
 $handle_update_company = function (mysqli $con, DbController $c, UserContext $ctx) {
   update_user($con, $c, $ctx);
   $c->update_company($con, $ctx, $_POST["bio"], $_POST["address"]);
+  return new HandlerResponse("Updating your profile ✨", "profile");
 };
 
 $handle_register_company = function (mysqli $con, DbController $c, UserContext $ctx) {

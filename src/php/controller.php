@@ -41,7 +41,9 @@ class DbController
     if ($this->repo->select_user_by_name_or_email($con, $name, $email) != null) {
       throw new Exception("A user with this name or email already exists");
     }
-    $req = new InsertUserRequest($email, $name, $password, $telephone, "", 0.0);
+    $req = $this->check_insert_user_business_rules(
+      new InsertUserRequest($email, $name, $password, $telephone, "", 0.0)
+    );
     return $this->repo->insert_user($con, $req);
   }
 
@@ -56,20 +58,38 @@ class DbController
     $this->session[USER_ID] = $user->id;
   }
 
-  public function logout() {
+  public function logout()
+  {
     $this->session = array();
+  }
+
+  private function check_insert_user_business_rules(InsertUserRequest $req)
+  {
+    if (strlen($req->password) < 8)
+      throw new Error("Password must be at least 8 characters");
+    if ($req->email === "" || $req->name === "" || $req->telephone === "")
+      throw new Error("Email, name or phone can not be empty");
+    return $req;
+  }
+
+  public function get_user_company(mysqli $con, UserContext $ctx): Company
+  {
+    return $this->repo->select_company_by_user_id($con, $ctx->id);
+  }
+
+  public function get_user_passenger(mysqli $con, UserContext $ctx): Passenger
+  {
+    return $this->repo->select_passenger_by_user_id($con, $ctx->id);
   }
 
   public function with_user_ctx(mysqli $con, array &$session, string $role, Closure $fn): Closure
   {
-    if (!array_key_exists(USER_ID, $session) && $role === '_') {
-      return null;
-    } else if (!array_key_exists(USER_ID, $session)) {
+    if (!array_key_exists(USER_ID, $session)) {
       throw new Error("Permission denied");
     } else {
       $user_id = $session[USER_ID];
       $user_ctx = $this->repo->select_user_by_id($con, $user_id);
-      if ($user_ctx->role !== $role && $role !== '*') {
+      if (($user_ctx->role !== $role && $role !== '*') || ($role === '*' && $user_ctx->role === NONE_ROLE)) {
         throw new Error("Permission Denied");
       } else {
         return function () use ($fn, $user_ctx) {
@@ -87,6 +107,17 @@ class DbController
     return $this->repo->select_user_by_id($con, $user_id);
   }
 
+  private function get_photo_url_from_temp_url(
+    string $user_id,
+    string $old_url,
+    string $image_type,
+    string $temp_url
+  ): string {
+    return $temp_url === ""
+      ? $old_url
+      : $this->upload_image($temp_url, $image_type, $user_id);
+  }
+
   public function update_user(
     mysqli $con,
     UserContext $ctx,
@@ -99,14 +130,14 @@ class DbController
     return $this->repo->update_user_by_id(
       $con,
       $ctx->id,
-      new InsertUserRequest(
+      $this->check_insert_user_business_rules(new InsertUserRequest(
         $email,
         $name,
         $password,
         $telephone,
-        $this->upload_image($temp_photo_url, PROFILE_IMAGE, $ctx->id),
+        $this->get_photo_url_from_temp_url($ctx->id, $ctx->photo_url, PROFILE_IMAGE, $temp_photo_url),
         $ctx->money
-      )
+      ))
     );
   }
 
@@ -138,10 +169,16 @@ class DbController
     UserContext $ctx,
     string $temp_passport_image_url
   ): bool {
+    $passenger = $this->repo->select_passenger_by_user_id($con, $ctx->id);
     return $this->repo->update_passenger_by_user_id(
       $con,
       $ctx->id,
-      $this->upload_image($temp_passport_image_url, PASSPORT_IMAGE, $ctx->id)
+      $this->get_photo_url_from_temp_url(
+        $ctx->id,
+        $passenger->passport_image_url,
+        PASSPORT_IMAGE,
+        $temp_passport_image_url
+      )
     );
   }
 

@@ -7,7 +7,9 @@ $with_secondary_template = function (string $header, string $content, string $ad
   $with_template(
     <<<HTML
     <div class="header">
-      <h1>$header</h1>
+      <a href="/">
+        <h1>$header</h1>
+      </a>
     </div>
     <div class="hero">
       $content
