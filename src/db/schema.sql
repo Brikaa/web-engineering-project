@@ -30,7 +30,7 @@ CREATE TABLE Company (
 CREATE TABLE Flight (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
   `company_user_id` varchar(36) NOT NULL,
-  `name` varchar(1024) NOT NULL,
+  `name` varchar(256) NOT NULL UNIQUE,
   `max_passengers` INT NOT NULL,
   `price` FLOAT NOT NULL,
   CONSTRAINT CHECK_POSITIVE_MAX_PASSENGERS CHECK ((`max_passengers` > 0)),

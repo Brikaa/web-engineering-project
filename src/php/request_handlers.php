@@ -94,11 +94,23 @@ $handle_send_message = function (mysqli $con, DbController $c, UserContext $ctx)
 };
 
 $handle_add_flight = function (mysqli $con, DbController $c, UserContext $ctx) {
-  $c->add_flight($con, $ctx, $_POST["name"], $_POST["max_passengers"], $_POST["price"]);
-};
-
-$handle_add_flight_city = function (mysqli $con, DbController $c, UserContext $ctx) {
-  $c->add_flight_city($con, $ctx, $_POST["flight_id"], $_POST["name"], new DateTime($_POST["date_in_city"]));
+  $flight_cities = array();
+  $city_names = $_POST["city_names"];
+  $city_dates = $_POST["city_dates"];
+  if (count($city_names) != count($city_dates))
+    throw new Error("The number of city names and the number of dates in cities do not match");
+  for ($i = 0; $i < count($city_names); ++$i) {
+    $flight_cities[] = new FlightCity($city_names[$i], new DateTime($city_dates[$i]));
+  }
+  $c->add_flight(
+    $con,
+    $ctx,
+    $_POST["name"],
+    intval($_POST["max_passengers"]),
+    floatval($_POST["price"]),
+    $flight_cities
+  );
+  return new HandlerResponse("Creating the flight ✈️", "");
 };
 
 $handle_cancel_flight = function (mysqli $con, DbController $c, UserContext $ctx) {

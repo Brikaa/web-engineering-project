@@ -14,6 +14,7 @@ require_once 'views/success.php';
 require_once 'views/profile.php';
 require_once 'views/deposit.php';
 require_once 'views/flight.php';
+require_once 'views/add_flight.php';
 
 const ACTION = "action";
 
@@ -195,6 +196,26 @@ $router = array(
       COMPANY_ROLE,
       function ($ctx) use ($con, $controller, $handle_cancel_flight) {
         return $handle_cancel_flight($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "handle_add_flight" => with_db(function (mysqli $con) use ($controller, $handle_add_flight) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      COMPANY_ROLE,
+      function ($ctx) use ($con, $controller, $handle_add_flight) {
+        return $handle_add_flight($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "add_flight" => with_db(function (mysqli $con) use ($controller, $add_flight_view) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      COMPANY_ROLE,
+      function ($_ctx) use ($add_flight_view) {
+        return $add_flight_view();
       }
     )();
   }),

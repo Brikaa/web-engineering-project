@@ -72,7 +72,10 @@ $home_view = function (
       $company_flights = $generate_flight_cards_from_flights($c->list_company_flights($con, $user));
       $html = <<<HTML
       <div class="section">
-        <h1>Company flights</h1>
+        <div class="space-between">
+          <h1>Company flights</h1>
+          <a href="/?action=add_flight"><img src="/assets/images/plus.svg"></a>
+        </div>
         <div class="flights">$company_flights</div>
       </div>
       HTML;

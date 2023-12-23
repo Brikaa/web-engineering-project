@@ -77,3 +77,18 @@ a {
   align-items: center;
   text-align: left;
 }
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+}
+
+.space-between > a > img {
+  height: 20px;
+}
+
+.space-between > a:hover {
+  opacity: 0.8;
+}

@@ -530,18 +530,33 @@ class Repo
     );
   }
 
-  public function insert_flight_city_for_flight(
-    mysqli $con,
-    string $flight_id,
-    string $city_name,
-    DateTime $date_in_city
-  ) {
+  public function insert_flight_cities_for_flight(mysqli $con, string $flight_id, array $flight_cities): bool
+  {
+    $values = array();
+    $bindings = "";
+    $params = array();
+    foreach ($flight_cities as $city) {
+      $values[] = "(?, ?, ?)";
+      $bindings .= "sss";
+      array_push($params, $flight_id, $city->name, $city->date_in_city->format("Y-m-d H:i:s"));
+    }
+    $values = join(", ", $values);
     return $this->execute_statement(
       $con,
-      "INSERT INTO FlightCity (flight_id, `name`, date_in_city) VALUES (?, ?, ?)",
-      "sss",
-      [$flight_id, $city_name, $date_in_city]
+      "INSERT INTO FlightCity (flight_id, `name`, date_in_city) VALUES $values",
+      $bindings,
+      $params
     );
+  }
+
+  public function select_flight_id_by_flight_name(mysqli $con, string $flight_name): ?string
+  {
+    return $this->select_one(
+      $con,
+      "SELECT Flight.id FROM Flight WHERE Flight.name = ?",
+      "s",
+      [$flight_name]
+    )[0];
   }
 
   public function delete_flight(
