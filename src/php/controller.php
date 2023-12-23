@@ -248,8 +248,10 @@ class DbController
       throw new Error("This flight is fully reserved");
     if ($cash && $ctx->money < $flight->price)
       throw new Error("You don't have enough money to book this flight");
-    return $this->repo->insert_flight_reservation_for_user($con, $ctx->id, $flight_id)
-      && $this->repo->change_money_for_user($con, $ctx->id, -$flight->price);
+    return
+      $this->repo->insert_flight_reservation_for_user($con, $ctx->id, $flight_id)
+      && $this->repo->change_money_for_user($con, $ctx->id, -$flight->price)
+      && $this->repo->change_money_for_user($con, $flight->company_user_id, $flight->price);
   }
 
   public function get_flight_reservation_id_for_flight(
@@ -274,7 +276,9 @@ class DbController
     if (!$this->repo->delete_flight_reservation_for_user($con, $ctx->id, $flight_reservation_id)) {
       throw new Error("Couldn't cancel this reservation");
     }
-    return $this->repo->change_money_for_user($con, $ctx->id, $flight_detail->price);
+    return
+      $this->repo->change_money_for_user($con, $ctx->id, $flight_detail->price)
+      && $this->repo->change_money_for_user($con, $flight_detail->company_user_id, -$flight_detail->price);
   }
 
   public function send_message(
@@ -332,6 +336,12 @@ class DbController
       throw new Error("You do not own this flight");
     if (!$this->repo->delete_flight($con, $ctx->id, $flight_id))
       throw new Error("Can't cancel this flight");
-    return $this->repo->change_money_for_registered_passengers($con, $flight_id, $flight->price);
+    return
+      $this->repo->change_money_for_registered_passengers($con, $flight_id, $flight->price)
+      && $this->repo->change_money_for_user(
+        $con,
+        $flight->company_user_id,
+        -$flight->price * $flight->registered_passengers
+      );
   }
 }

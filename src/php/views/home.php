@@ -37,7 +37,17 @@ $home_view = function (
     $html = "";
     if ($user->role == PASSENGER_ROLE) {
       $upcoming_flights = $generate_flight_cards_from_flights($c->get_upcoming_flights($con, $user));
-      $available_flights = $generate_flight_cards_from_flights($c->get_available_flights($con, $user));
+      $from = "";
+      $to = "";
+      $af = null;
+      if (array_key_exists("from", $_GET) && array_key_exists("to", $_GET)) {
+        $from = $_GET["from"];
+        $to = $_GET["to"];
+        $af = $c->get_flights_by_source_and_destination($con, $user, $_GET["from"], $_GET["to"]);
+      } else {
+        $af = $c->get_available_flights($con, $user);
+      }
+      $available_flights = $generate_flight_cards_from_flights($af);
       $completed_flights = $generate_flight_cards_from_flights($c->get_completed_flights($con, $user));
       $html = <<<HTML
         <div class="section">
@@ -46,9 +56,9 @@ $home_view = function (
         </div>
         <div class="section">
           <h1>Available flights</h1>
-          <form action="/" method="POST">
-            <input class="input" type="text" name="from" placeholder="From" required>
-            <input class="input" type="text" name="to" placeholder="To" required>
+          <form action="/" method="GET">
+            <input class="input" type="text" name="from" placeholder="From" value="$from">
+            <input class="input" type="text" name="to" placeholder="To" value="$to">
             <input class="button secondary" type="submit" value="Go">
           </form>
           <div class="flights">$available_flights</div>

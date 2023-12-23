@@ -335,18 +335,17 @@ class Repo
     string $src,
     string $dest
   ): array {
-    $now = date("Y-m-d H:i:s");
     return $this->select_flights_summaries_by_condition(
       $con,
       "Flight",
-      "StartCity.date_in_city > $now
+      "StartCity.date_in_city > NOW()
       AND Flight.id NOT IN (
         SELECT FlightReservation.flight_id FROM FlightReservation WHERE FlightReservation.passenger_user_id = ?
       )
-      AND StartCity.name LIKE %?%
-      AND EndCity.name LIKE %?%",
+      AND StartCity.name LIKE ?
+      AND EndCity.name LIKE ?",
       "sss",
-      [$user_id, $src, $dest]
+      [$user_id, '%' . $src . '%', '%' . $dest . '%']
     );
   }
 

@@ -97,3 +97,6 @@
   - View received messages
   - View sent messages
   - Reply to message
+
+- Nice to haves
+  - Handle field updates one by one instead of requiring the full object each time
