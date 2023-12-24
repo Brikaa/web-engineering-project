@@ -11,6 +11,7 @@ body {
   --primary-button-color: rgba(177, 143, 105, 0.85);
   --secondary-button-color: rgba(96, 68, 36, 0.85);
   --fast-transition: 0.1s;
+  scroll-behavior: smooth;
 }
 
 .home {
@@ -32,12 +33,21 @@ body {
   justify-content: center;
 }
 
-.avatar-icon {
+.avatar-icon,
+.profile-icon {
   border-radius: 50%;
-  width: 128px;
-  height: 128px;
   border: 3px solid var(--white);
   background-size: cover;
+}
+
+.avatar-icon {
+  width: 128px;
+  height: 128px;
+}
+
+.profile-icon {
+  width: 64px;
+  height: 64px;
 }
 
 .landing-content > form,

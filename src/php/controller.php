@@ -292,14 +292,9 @@ class DbController
     return $this->repo->insert_message($con, $ctx->id, $receiver_id, $message);
   }
 
-  public function get_received_messages(mysqli $con, UserContext $ctx): array
+  public function get_messages(mysqli $con, UserContext $ctx): array
   {
-    return $this->repo->select_received_messages_for_user($con, $ctx->id);
-  }
-
-  public function get_sent_messages(mysqli $con, UserContext $ctx): array
-  {
-    return $this->repo->select_sent_messages_for_user($con, $ctx->id);
+    return $this->repo->select_messages_for_user($con, $ctx->id);
   }
 
   public function list_company_flights(mysqli $con, UserContext $ctx): array

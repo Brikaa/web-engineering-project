@@ -15,6 +15,8 @@ require_once 'views/profile.php';
 require_once 'views/deposit.php';
 require_once 'views/flight.php';
 require_once 'views/add_flight.php';
+require_once 'views/send_message.php';
+require_once 'views/messages.php';
 
 const ACTION = "action";
 
@@ -216,6 +218,36 @@ $router = array(
       COMPANY_ROLE,
       function ($_ctx) use ($add_flight_view) {
         return $add_flight_view();
+      }
+    )();
+  }),
+  "handle_send_message" => with_db(function (mysqli $con) use ($controller, $handle_send_message) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      "*",
+      function ($ctx) use ($con, $controller, $handle_send_message) {
+        return $handle_send_message($con, $controller, $ctx);
+      }
+    )();
+  }),
+  "send_message" => with_db(function (mysqli $con) use ($controller, $send_message_view) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      "*",
+      function ($_ctx) use ($send_message_view) {
+        return $send_message_view();
+      }
+    )();
+  }),
+  "messages" => with_db(function (mysqli $con) use ($controller, $messages_view) {
+    return $controller->with_user_ctx(
+      $con,
+      $_SESSION,
+      "*",
+      function ($ctx) use ($con, $controller, $messages_view) {
+        return $messages_view($con, $controller, $ctx);
       }
     )();
   }),

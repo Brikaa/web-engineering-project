@@ -91,6 +91,7 @@ $handle_cancel_reservation = function (mysqli $con, DbController $c, UserContext
 
 $handle_send_message = function (mysqli $con, DbController $c, UserContext $ctx) {
   $c->send_message($con, $ctx, $_POST["receiver_id"], $_POST["message"]);
+  return new HandlerResponse("Sending the message ✉️", "messages");
 };
 
 $handle_add_flight = function (mysqli $con, DbController $c, UserContext $ctx) {

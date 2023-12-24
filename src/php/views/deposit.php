@@ -1,8 +1,8 @@
 <?php
-require_once 'secondary_template.php';
+require_once 'primary_template.php';
 
-$deposit_view = function () use ($with_secondary_template) {
-  $with_secondary_template(
+$deposit_view = function () use ($with_primary_template) {
+  $with_primary_template(
     "Deposit money",
     <<<HTML
     <form action="/" method="post">

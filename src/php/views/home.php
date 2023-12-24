@@ -1,9 +1,9 @@
 <?php
 
 declare(strict_types=1);
-require_once 'secondary_template.php';
+require_once 'primary_template.php';
 require_once 'landing_template.php';
-require_once 'main_template.php';
+require_once 'home_template.php';
 require_once 'util.php';
 require_once __DIR__ . '/../model.php';
 
@@ -31,7 +31,7 @@ $generate_flight_cards_from_flights = function (array $flights) {
 $home_view = function (
   mysqli $con,
   DbController $c
-) use ($with_landing_template, $with_main_template, $with_secondary_template, $generate_flight_cards_from_flights) {
+) use ($with_landing_template, $with_home_template, $with_primary_template, $generate_flight_cards_from_flights) {
   $user = $c->get_logged_in_user($con);
   if ($user && $user->role != NONE_ROLE) {
     $html = "";
@@ -81,7 +81,7 @@ $home_view = function (
       HTML;
     }
     $profile_image_url = get_profile_image_url($user);
-    $with_main_template(
+    $with_home_template(
       "Home",
       $html,
       <<<HTML
@@ -94,14 +94,16 @@ $home_view = function (
         <hr>
         <div class="actions">
           <a href="/?action=deposit" title="Deposit money"><img src="/assets/images/money.svg" /></a>
-          <a href="/?action=messages" title="Messages"><img src="/assets/images/envelope.svg" /></a>
+          <a href="/?action=messages#last" target="_blank" title="Messages">
+            <img src="/assets/images/envelope.svg" />
+          </a>
           <a href="/?action=handle_logout" title="Log out"><img src="/assets/images/sign-out.svg" /></a>
         </div>
       </div>
       HTML
     );
   } else if ($user) {
-    $with_secondary_template(
+    $with_primary_template(
       "Let's finish your profile ✨",
       <<<HTML
         <div>

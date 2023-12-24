@@ -1,11 +1,3 @@
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-  font-weight: normal;
-}
-
 .main {
   display: flex;
   gap: 1rem;
@@ -84,5 +76,4 @@ p {
 
 .profile-area > hr {
   color: white;
-  margin: 0;
 }

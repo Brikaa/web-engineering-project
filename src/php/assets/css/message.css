@@ -1,0 +1,20 @@
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.message {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.message p {
+  padding: 0.5rem 0.3rem;
+  border-radius: 6px;
+  background-color: var(--primary-button-color);
+}
+
+.message.sender p {
+  background-color: var(--secondary-button-color);
+}

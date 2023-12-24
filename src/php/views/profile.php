@@ -1,9 +1,9 @@
 <?php
 require_once __DIR__ . '/../model.php';
-require_once 'secondary_template.php';
+require_once 'primary_template.php';
 require_once 'util.php';
 
-$profile_view = function (mysqli $con, DbController $c, UserContext $ctx) use ($with_secondary_template) {
+$profile_view = function (mysqli $con, DbController $c, UserContext $ctx) use ($with_primary_template) {
   $additional_html = "";
   if ($ctx->role === PASSENGER_ROLE) {
     $passenger = $c->get_user_passenger($con, $ctx);
@@ -23,7 +23,7 @@ $profile_view = function (mysqli $con, DbController $c, UserContext $ctx) use ($
   }
   $form_action = $ctx->role === PASSENGER_ROLE ? "handle_update_passenger" : "handle_update_company";
   $image_url = get_profile_image_url($ctx);
-  $with_secondary_template(
+  $with_primary_template(
     "Profile",
     <<<HTML
     <form class="profile" method="POST" action="/" enctype="multipart/form-data">

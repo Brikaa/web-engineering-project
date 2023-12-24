@@ -572,31 +572,31 @@ class Repo
     );
   }
 
-  public function select_messages_for_user(mysqli $con, string $user_id, string $first_party, string $second_party)
+  public function select_messages_for_user(mysqli $con, string $user_id)
   {
     $rows = $this->select_all(
       $con,
-      "SELECT Message.id, Message.message, User.name
+      "SELECT
+        Message.id,
+        Message.message,
+        Message.sender_user_id,
+        Sender.name,
+        Sender.photo_url,
+        Message.receiver_user_id,
+        Receiver.name,
+        Receiver.photo_url
       FROM `Message`
-      LEFT JOIN User ON `Message`." . $second_party . "_user_id = User.id
-      WHERE Message." . $first_party . "_user_id = ?",
-      "s",
-      [$user_id]
+        LEFT JOIN User AS Sender on Sender.id = Message.sender_user_id
+        LEFT JOIN User AS Receiver on Receiver.id = Message.receiver_user_id
+      WHERE
+        Message.sender_user_id = ? OR Message.receiver_user_id = ?",
+      "ss",
+      [$user_id, $user_id]
     );
     $res = array();
     foreach ($rows as $row) {
-      $res[] = new Message($row[0], $row[1], $row[2]);
+      $res[] = new Message($row[0], $row[1], $row[2], $row[3], $row[4], $row[5], $row[6], $row[7]);
     }
     return $res;
-  }
-
-  public function select_received_messages_for_user(mysqli $con, string $user_id)
-  {
-    return $this->select_messages_for_user($con, $user_id, "receiver", "sender");
-  }
-
-  public function select_sent_messages_for_user(mysqli $con, string $user_id)
-  {
-    return $this->select_messages_for_user($con, $user_id, "sender", "receiver");
   }
 }

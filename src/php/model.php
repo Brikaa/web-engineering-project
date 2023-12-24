@@ -159,12 +159,31 @@ final class FlightDetail extends BareFlight
 final class Message
 {
   public string $id;
-  public string $second_party_name;
   public string $message;
+  public string $sender_user_id;
+  public string $sender_name;
+  public string $sender_photo_url;
+  public string $receiver_user_id;
+  public string $receiver_name;
+  public string $receiver_photo_url;
 
-  public function __construct(string $id, string $second_party_name, string $message)
-  {
-    $this->second_party_name = $second_party_name;
+  public function __construct(
+    string $id,
+    string $message,
+    string $sender_user_id,
+    string $sender_name,
+    string $sender_photo_url,
+    string $receiver_user_id,
+    string $receiver_name,
+    string $receiver_photo_url,
+  ) {
+    $this->id = $id;
     $this->message = $message;
+    $this->sender_user_id = $sender_user_id;
+    $this->sender_name = $sender_name;
+    $this->sender_photo_url = $sender_photo_url;
+    $this->receiver_user_id = $receiver_user_id;
+    $this->receiver_name = $receiver_name;
+    $this->receiver_photo_url = $receiver_photo_url;
   }
 }

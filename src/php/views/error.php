@@ -1,8 +1,8 @@
 <?php
-require_once 'secondary_template.php';
+require_once 'primary_template.php';
 
-$error_view = function (string $message) use ($with_secondary_template) {
-  $with_secondary_template(
+$error_view = function (string $message) use ($with_primary_template) {
+  $with_primary_template(
     "Woops, something's not right! 😬",
     "<p>$message</p>",
     <<<HTML

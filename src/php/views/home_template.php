@@ -1,13 +1,13 @@
 <?php
-require_once 'secondary_template.php';
+require_once 'primary_template.php';
 
-$with_main_template = function (
+$with_home_template = function (
   string $title,
   string $left_html,
   string $right_html,
   string $additional_head = ""
-) use ($with_secondary_template) {
-  $with_secondary_template(
+) use ($with_primary_template) {
+  $with_primary_template(
     $title,
     <<<HTML
     <div class="main">
@@ -20,7 +20,7 @@ $with_main_template = function (
     </div>
     HTML,
     <<<HTML
-    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/home.css">
     $additional_head
     HTML
   );

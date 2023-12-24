@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-require_once 'secondary_template.php';
+require_once 'primary_template.php';
 
 function create_submit(string $action, string $id, string $button_class, string $button_text): string
 {
@@ -14,7 +14,7 @@ function create_submit(string $action, string $id, string $button_class, string 
   HTML;
 }
 
-$flight_view = function (mysqli $con, DbController $c, UserContext $ctx) use ($with_secondary_template) {
+$flight_view = function (mysqli $con, DbController $c, UserContext $ctx) use ($with_primary_template) {
   if (!array_key_exists("id", $_GET)) {
     throw new Error("Flight id was not provided");
   }
@@ -40,7 +40,7 @@ $flight_view = function (mysqli $con, DbController $c, UserContext $ctx) use ($w
   } else if ($flight_reservation_id != NULL) {
     $actions_html = create_submit("handle_cancel_reservation", $flight_reservation_id, "danger", "Cancel reservation");
   }
-  $with_secondary_template(
+  $with_primary_template(
     "Flight " . $flight->name,
     <<<HTML
     <div class="flight-info">

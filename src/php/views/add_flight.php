@@ -1,7 +1,9 @@
 <?php
-require_once 'secondary_template.php';
 
-$add_flight_view = function () use ($with_secondary_template) {
+declare(strict_types=1);
+require_once 'primary_template.php';
+
+$add_flight_view = function () use ($with_primary_template) {
   if (array_key_exists("no_cities", $_GET)) {
     $no_cities = intval($_GET["no_cities"]);
     $cities = "";
@@ -13,7 +15,7 @@ $add_flight_view = function () use ($with_secondary_template) {
       </div>
       HTML;
     }
-    $with_secondary_template(
+    $with_primary_template(
       "Add flight",
       <<<HTML
       <form action="/" method="post">
@@ -27,7 +29,7 @@ $add_flight_view = function () use ($with_secondary_template) {
       HTML
     );
   } else {
-    $with_secondary_template(
+    $with_primary_template(
       "Number of cities",
       <<<HTML
       <form action="/" method="get">
