@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 require_once __DIR__ . '/../model.php';
 require_once 'primary_template.php';
 require_once 'util.php';
@@ -22,14 +24,13 @@ $profile_view = function (mysqli $con, DbController $c, UserContext $ctx) use ($
     HTML;
   }
   $form_action = $ctx->role === PASSENGER_ROLE ? "handle_update_passenger" : "handle_update_company";
-  $image_url = get_profile_image_url($ctx);
   $with_primary_template(
     "Profile",
     <<<HTML
     <form class="profile" method="POST" action="/" enctype="multipart/form-data">
       <input type="text" name="action" value="$form_action" hidden>
       <label for="photo">
-        <div class="avatar-icon" style="background-image: url('$image_url')"></div>
+        <div class="avatar-icon" style="background-image: url('$ctx->photo_url')"></div>
       </label>
       <input class="input" type="file" name="photo" id="photo" accept=".png,.jpg,.jpeg">
       <input class="input" type="email" name="email" placeholder="Email" value="$ctx->email" required>

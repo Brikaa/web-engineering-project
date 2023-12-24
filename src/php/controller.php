@@ -8,6 +8,7 @@ require_once "repo.php";
 const USER_ID = "user_id";
 const PASSPORT_IMAGE = "passport";
 const PROFILE_IMAGE = "profile";
+const DEFAULT_PROFILE_IMAGE_URL = "/assets/images/user.svg";
 
 class DbController
 {
@@ -42,7 +43,7 @@ class DbController
       throw new Exception("A user with this name or email already exists");
     }
     $req = $this->check_insert_user_business_rules(
-      new InsertUserRequest($email, $name, $password, $telephone, "", 0.0)
+      new InsertUserRequest($email, $name, $password, $telephone, DEFAULT_PROFILE_IMAGE_URL, 0.0)
     );
     return $this->repo->insert_user($con, $req);
   }

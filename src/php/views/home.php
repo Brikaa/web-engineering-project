@@ -80,14 +80,13 @@ $home_view = function (
       </div>
       HTML;
     }
-    $profile_image_url = get_profile_image_url($user);
     $with_home_template(
       "Home",
       $html,
       <<<HTML
       <div class="profile-area">
         <a class="user-info" href="/?action=profile">
-          <div class="avatar-icon" style="background-image: url('$profile_image_url')"></div>
+          <div class="avatar-icon" style="background-image: url('$user->photo_url')"></div>
           <h2>$user->name</h2>
           <h3>$user->money$</h3>
         </a>
@@ -106,7 +105,7 @@ $home_view = function (
     $with_primary_template(
       "Let's finish your profile ✨",
       <<<HTML
-        <div>
+          <div>
           <h1>I'm a...</h1>
           <div class="choices">
             <h2 id="passenger-choice">Passenger</h2>
@@ -128,7 +127,7 @@ $home_view = function (
       HTML,
       <<<HTML
       <script src='/assets/js/account_type.js' defer></script>
-      <script src='/assets/css/account_type.css'></script>
+      <link rel="stylesheet" href='/assets/css/account_type.css'>
       HTML
     );
   } else {

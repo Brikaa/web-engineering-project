@@ -32,7 +32,7 @@ $flight_view = function (mysqli $con, DbController $c, UserContext $ctx) use ($w
     && $flight_reservation_id == NULL
   ) {
     $actions_html = create_submit("handle_book_flight_cash", $flight->id, "secondary", "Book cash");
-    if ($ctx->money > $flight->price) {
+    if ($ctx->money >= $flight->price) {
       $actions_html .= create_submit("handle_book_flight_credit", $flight->id, "primary", "Book credit");
     }
   } else if ($ctx->role === COMPANY_ROLE) {

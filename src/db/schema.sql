@@ -61,6 +61,7 @@ CREATE TABLE FlightCity (
 CREATE TABLE Message (
   `id` varchar(36) DEFAULT (UUID()) PRIMARY KEY,
   `message` TEXT NOT NULL,
+  `date` TIMESTAMP NOT NULL DEFAULT NOW(),
   `sender_user_id` varchar(36) NOT NULL,
   `receiver_user_id` varchar(36) NOT NULL,
   CONSTRAINT FK_MESSAGE_SENDER FOREIGN KEY (sender_user_id) REFERENCES User(id) ON DELETE CASCADE,

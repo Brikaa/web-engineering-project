@@ -32,7 +32,7 @@ $messages_view = function (mysqli $con, DbController $c, UserContext $ctx) use (
       <div>
         <div class="profile-icon" style="background-image: url('$photo_url')"></div>
       </div>
-      <div>
+      <div class="message-body">
         <div class="message-header"><h2>$name</h2></div>
         <div class="message-content"><p>$message->message</p></div>
       </div>

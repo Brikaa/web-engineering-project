@@ -589,7 +589,8 @@ class Repo
         LEFT JOIN User AS Sender on Sender.id = Message.sender_user_id
         LEFT JOIN User AS Receiver on Receiver.id = Message.receiver_user_id
       WHERE
-        Message.sender_user_id = ? OR Message.receiver_user_id = ?",
+        Message.sender_user_id = ? OR Message.receiver_user_id = ?
+      ORDER BY Message.date",
       "ss",
       [$user_id, $user_id]
     );

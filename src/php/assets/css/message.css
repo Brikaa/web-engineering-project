@@ -1,7 +1,7 @@
 .messages {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .message {
@@ -9,8 +9,15 @@
   gap: 0.5rem;
 }
 
+.message-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  align-items: start;
+}
+
 .message p {
-  padding: 0.5rem 0.3rem;
+  padding: 0.5rem 0.5rem;
   border-radius: 6px;
   background-color: var(--primary-button-color);
 }

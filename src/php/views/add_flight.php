@@ -11,7 +11,7 @@ $add_flight_view = function () use ($with_primary_template) {
       $cities .= <<<HTML
       <div class="space-between">
         <input class="input" type="text" name="city_names[]" placeholder="City name">
-        <input class="input" type="date" name="city_dates[]" placeholder="Date in city">
+        <input class="input" type="datetime-local" name="city_dates[]" placeholder="Date in city">
       </div>
       HTML;
     }
