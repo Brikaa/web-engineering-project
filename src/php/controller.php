@@ -328,16 +328,13 @@ class DbController
     UserContext $ctx,
     string $flight_id,
   ): bool {
-    $flight = $this->repo->select_flight_details_by_flight_id($con, $flight_id);
-    if (!$this->repo->delete_flight($con, $ctx->id, $flight_id))
+    $flight = $this->repo->select_flight_details_by_flight_id_and_company_user_id($con, $flight_id, $ctx->id);
+    if (!$flight)
       throw new Error("Can't cancel this flight");
     return
-      $this->repo->change_money_for_registered_passengers($con, $flight_id, $flight->price)
-      && $this->repo->change_money_for_user(
-        $con,
-        $flight->company_user_id,
-        -$flight->price * $flight->registered_passengers
-      );
+      $this->repo->change_money_for_registered_passengers($con, $flight_id, $flight->price) &&
+      $this->repo->change_money_for_user($con, $ctx->id, -$flight->price * $flight->registered_passengers) &&
+      $this->repo->delete_flight($con, $ctx->id, $flight_id);
   }
 
   public function deposit_money(mysqli $con, UserContext $ctx, float $amount): bool
