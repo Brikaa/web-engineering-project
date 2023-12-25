@@ -21,7 +21,7 @@ $flight_view = function (mysqli $con, DbController $c, UserContext $ctx) use ($w
   $flight = $c->get_flight_details($con, $_GET["id"]);
   $cities = "";
   foreach ($flight->cities as $city) {
-    $date = format_date($city->date_in_city);
+    $date = full_format_date($city->date_in_city);
     $cities .= "<li>$city->name - $date</li>";
   }
   $actions_html = "";

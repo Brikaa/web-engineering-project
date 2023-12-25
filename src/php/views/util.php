@@ -7,3 +7,8 @@ function format_date(DateTime $date): string
 {
   return $date->format("jS F Y");
 }
+
+function full_format_date(DateTime $date): string
+{
+  return $date->format("jS F Y H:i:s");
+}
